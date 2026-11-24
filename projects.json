@@ -122,6 +122,28 @@
       "branch": "main"
     },
     {
+      "repo": "CalistaVerner/Project-Asteria",
+      "slug": "project-asteria",
+      "name": "Project Asteria",
+      "kind": "fork",
+      "base": "LooperSalty/AnyXboxX",
+      "stage": "menus",
+      "within": 0,
+      "status": "active",
+      "summary": "The maintainer reports that a local development build reaches the menus and allows settings changes. Output stays black when entering the 3D scene.",
+      "evidence": "Asteria-specific README status dated 2026-11-24 (maintainer report)",
+      "caveat": "Public branch reproduction, hardware, timings and distinct fork implementation not yet independently verified; upstream results are not counted",
+      "tested_on": null,
+      "backend": "D3D12",
+      "shader_path": "RDNA2 to DXIL",
+      "language": "Python, C++, Rust",
+      "avatar": "https://avatars.githubusercontent.com/u/45480987?v=4&s=80",
+      "pushed_at": "2026-11-24T14:09:51Z",
+      "created_at": "2026-11-24T12:59:57Z",
+      "license": "GPL-3.0",
+      "branch": "main"
+    },
+    {
       "repo": "fablinoo/palmwave",
       "slug": "palmwave",
       "name": "Palmwave",
