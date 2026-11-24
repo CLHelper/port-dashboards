@@ -85,6 +85,13 @@ h1.pname { font-size: clamp(36px, 5.4vw, 66px); word-break: break-word; }
 .ring-center .pct small { font-size: 26px; color: var(--muted); }
 .ring-center .lbl { font: 700 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
 .ring-center .sub { font-weight: 700; margin-top: 2px; }
+/* The ring fills from empty on load, like the project dashboards' ring. */
+.ring .bar.fill-in { animation: ring-fill 1.6s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ring-fill { from { stroke-dashoffset: 540.35; } to { stroke-dashoffset: var(--to); } }
+.ring-link { color: inherit; }
+.ring-link:hover { text-decoration: none; }
+.ring-link:hover .sub { color: var(--teal); }
+@media (prefers-reduced-motion: reduce) { .ring .bar.fill-in { animation: none; } }
 .ring-note { color: var(--muted); font-size: 14px; text-align: center; max-width: 340px; }
 
 /* ---------- overall card ---------- */

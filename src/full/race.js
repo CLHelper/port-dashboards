@@ -3,7 +3,7 @@
  * ladder. This page's own ring is its milestone score; the ladder places it among the other projects. */
 (function () {
   'use strict';
-  const SLUG = 'leonida';
+  const SLUG = CFG.slug;   // the page's project, from the config build.py writes
   const { esc } = window.Dash;
 
   function switcher(d) {

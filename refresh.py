@@ -34,6 +34,7 @@ def refresh(project, meta):
     if avatar:
         project["avatar"] = avatar + AVATAR_SIZE
     project["pushed_at"] = meta.get("pushed_at")
+    project["branch"] = meta.get("default_branch") or project.get("branch") or "main"
     project["created_at"] = meta.get("created_at")
     project["license"] = (meta.get("license") or {}).get("spdx_id")
 

@@ -111,13 +111,36 @@ class SiteTests(unittest.TestCase):
         with open(os.path.join(self.out, *parts), encoding="utf-8") as f:
             return f.read()
 
-    def test_every_project_has_a_dashboard_with_the_switcher(self):
+    def config(self, page):
+        m = re.search(r'<script type="application/json" id="project-config">(.*?)</script>', page, re.S)
+        self.assertIsNotNone(m, "page has no project config")
+        return json.loads(m.group(1))
+
+    def test_every_project_gets_the_full_dashboard_with_its_own_config(self):
         for p in self.data["projects"]:
             with self.subTest(slug=p["slug"]):
                 page = self.read(p["slug"], "index.html")
-                if not p.get("custom"):
-                    for q in self.data["projects"]:
-                        self.assertIn(f'value="../{q["slug"]}/"', page)
+                cfg = self.config(page)
+                self.assertEqual((cfg["slug"], cfg["repo"], cfg["stage"]), (p["slug"], p["repo"], p["stage"]))
+                for part in ('id="live"', 'id="pipe"', 'id="journey"', 'id="blockers"', 'id="pulse"', 'id="queue"',
+                             'id="triage"', 'id="hardware"', 'id="work"', 'id="faq"', 'id="tokenInput"', 'id="switcher"'):
+                    self.assertIn(part, page)
+                self.assertIn('src="../assets/full/live.js"', page)
+
+    def test_leonida_keeps_its_own_sources_and_the_others_get_the_generic_parts(self):
+        for p in self.data["projects"]:
+            with self.subTest(slug=p["slug"]):
+                page = self.read(p["slug"], "index.html")
+                own = "readme" in p.get("features", [])
+                self.assertNotIn('data-only="generic"' if own else 'data-only="leonida"', page)
+                self.assertEqual('src="../assets/full/project.js"' in page, not own)
+                self.assertEqual('src="../assets/full/coord.js"' in page, "coord" in p.get("features", []))
+                self.assertEqual('class="gone"' in page, "gone" in p.get("features", []))
+
+    def test_the_engine_scripts_are_served_once(self):
+        for name in ("live.js", "pipeline.js", "project.js", "race.js", "hardware.json"):
+            self.assertTrue(os.path.isfile(os.path.join(self.out, "assets", "full", name)), name)
+        self.assertFalse(os.path.exists(os.path.join(self.out, "assets", "full", "page.html")))
 
     def test_the_standings_list_every_ranked_project_in_order(self):
         page = self.read("index.html")
@@ -129,7 +152,9 @@ class SiteTests(unittest.TestCase):
             for name in files:
                 if name.endswith(".html"):
                     with self.subTest(file=name), open(os.path.join(folder, name), encoding="utf-8") as f:
-                        self.assertNotRegex(f.read(), r"\{\{\w+\}\}")
+                        text = f.read()
+                        self.assertNotRegex(text, r"\{\{\w+\}\}")
+                        self.assertNotRegex(text, r"@@[A-Z_]+@@")
 
     def test_data_json_matches_the_standings(self):
         d = json.loads(self.read("data.json"))

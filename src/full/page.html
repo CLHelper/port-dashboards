@@ -3,27 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leonida · Road to Playable</title>
-<meta name="description" content="Live community dashboard for the Leonida port: how far it is from playable, what blocks it, and who works on what.">
-<meta property="og:title" content="Leonida · Road to Playable">
-<meta property="og:description" content="Live progress of the Leonida port, straight from GitHub.">
-<!-- Link previews: crawlers do not run the page, so they get a picture of the share card (?card=1) taken from the live page.
-     The ?v= changes with each new picture, because Discord and X keep an image per URL. -->
+<title>@@NAME@@ · Road to Playable</title>
+<meta name="description" content="@@DESCRIPTION@@">
+<meta property="og:title" content="@@NAME@@ · Road to Playable">
+<meta property="og:description" content="@@DESCRIPTION@@">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Leonida live dashboard">
-<meta property="og:url" content="https://clhelper.github.io/port-dashboards/leonida/">
-<meta property="og:image" content="https://clhelper.github.io/port-dashboards/leonida/og-image.png?v=20261124-0850">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Road to Playable: the progress ring with the share of milestones done, and the latest project numbers">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Leonida · Road to Playable">
-<meta name="twitter:description" content="Live progress of the Leonida port, straight from GitHub.">
-<meta name="twitter:image" content="https://clhelper.github.io/port-dashboards/leonida/og-image.png?v=20261124-0850">
+<meta property="og:site_name" content="Road to Playable">
+<meta property="og:url" content="@@URL@@">
+@@OG_IMAGE@@
+<meta name="twitter:title" content="@@NAME@@ · Road to Playable">
+<meta name="twitter:description" content="@@DESCRIPTION@@">
 <meta name="theme-color" content="#0a0718">
-<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="favicon-64.png" sizes="64x64" type="image/png">
-<link rel="apple-touch-icon" href="favicon-180.png">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../assets/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="../assets/favicon-180.png">
 <link rel="stylesheet" href="../assets/ladder.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -642,6 +635,18 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* ---------- per-project sections (project.js) ---------- */
+.muted { color: var(--muted); font-weight: 400; }
+.pfacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 22px; }
+.pf span { display: block; font: 700 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.pf b { font-weight: 600; }
+.iss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.iss-col h3 { margin: 0 0 10px; font-size: 16px; }
+.iss, .rel-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
+.iss li span, .rel-list li span { display: block; font-size: 12px; }
+.rel-list li span { display: inline; }
+.rel-list { margin: 12px 0; }
+[data-feature-off] { display: none !important; }
 /* ---------- the shared ladder under the ring (race.js) ---------- */
 .race { position: relative; z-index: 1; margin-top: 36px; }
 .race .ladder-host { background: rgba(10,7,24,.72); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px 10px; }
@@ -650,7 +655,7 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 </style>
 </head>
 <body>
-<aside class="gone" aria-labelledby="goneTitle">
+<aside class="gone" aria-labelledby="goneTitle" data-feature="gone">
   <div class="wrap">
     <div class="g-kicker">Update · 24 November 2026</div>
     <h2 id="goneTitle">The original repository is gone</h2>
@@ -668,7 +673,7 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 </aside>
 <header class="topbar">
   <div class="wrap">
-    <span class="brand">Leonida</span>
+    <a class="brand" href="../" title="All projects">@@NAME@@</a>
     <label class="switch"><span>Project</span><select id="switcher" aria-label="Pick a project"><option value="../">Standings: every project</option></select></label>
     <nav class="nav">
       <a href="#live">Live</a>
@@ -769,7 +774,8 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <div>
           <div class="eyebrow">Part 1 · For everyone</div>
           <h2>The road to playable</h2>
-          <p class="lede">Four acts, from reading your copy of the game to actually playing it. Each stage is read live from the project's own status table.</p>
+          <p class="lede" data-only="leonida">Four acts, from reading your copy of the game to actually playing it. Each stage is read live from the project's own status table.</p>
+          <p class="lede" data-only="generic">The shared ladder, from groundwork to playable. The stage is read by hand from @@NAME@@'s own README, status notes and commits on @@CHECKED@@; everything else on this page is live.</p>
         </div>
       </div>
       <div id="journeyBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
@@ -782,7 +788,8 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <div>
           <div class="eyebrow">What's in the way</div>
           <h2>Blockers &amp; bottlenecks</h2>
-          <p class="lede">What has to happen before the next big step, taken from the coordination issue the maintainers keep up to date.</p>
+          <p class="lede" data-only="leonida">What has to happen before the next big step, taken from the coordination issue the maintainers keep up to date.</p>
+          <p class="lede" data-only="generic">Where @@NAME@@ stops today, by its own account, and the next stage on the ladder.</p>
         </div>
       </div>
       <div id="blockersBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
@@ -795,7 +802,8 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <div>
           <div class="eyebrow">The hardest part</div>
           <h2>The graphics layer</h2>
-          <p class="lede">The game talks to the Xbox version of DirectX 12. Leonida answers every one of those calls with Vulkan, so a PC graphics card can draw the frame. This counts the calls that are already built.</p>
+          <p class="lede" data-only="leonida">The game talks to the Xbox version of DirectX 12. Leonida answers every one of those calls with Vulkan, so a PC graphics card can draw the frame. This counts the calls that are already built.</p>
+          <p class="lede" data-only="generic">The game talks to the Xbox version of DirectX 12 and ships GPU programs compiled for the console's graphics chip. How @@NAME@@ gets them onto a PC graphics card.</p>
         </div>
       </div>
       <div id="graphicsBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
@@ -808,7 +816,8 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <div>
           <div class="eyebrow">Proof, not promises</div>
           <h2>How sure are we?</h2>
-          <p class="lede">Every rule the shader translator follows says in the project's design notes how it was checked: on a real graphics card, against the AMD compilers in LLVM and Mesa, over every shader, or only in a CPU test. Next to it: how much of the console's system software still has no PC stand-in.</p>
+          <p class="lede" data-only="leonida">Every rule the shader translator follows says in the project's design notes how it was checked: on a real graphics card, against the AMD compilers in LLVM and Mesa, over every shader, or only in a CPU test. Next to it: how much of the console's system software still has no PC stand-in.</p>
+          <p class="lede" data-only="generic">What backs @@NAME@@'s place on the ladder: where the claim comes from, on which machine, and what it leaves out.</p>
         </div>
       </div>
       <div id="proofBody"><div class="pending"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading the project's documents…</b><p class="pending-msg"></p></div></div></div>
@@ -872,10 +881,12 @@ code.hash { word-break: break-all; font-size: 12.5px; }
       <div class="sec-head">
         <div>
           <div class="eyebrow">Before merging</div>
-          <h2>Security reviews</h2>
-          <p class="lede">Volunteers read the open pull requests for malicious code, so the maintainers can merge with less risk. Every verdict, live from the table they share.</p>
+          <h2 data-only="leonida">Security reviews</h2><h2 data-only="generic">Before you run it</h2>
+          <p class="lede" data-only="leonida">Volunteers read the open pull requests for malicious code, so the maintainers can merge with less risk. Every verdict, live from the table they share.</p>
+          <p class="lede" data-only="generic">Before you run anything from @@NAME@@: what it publishes as downloads, and where to take them from.</p>
         </div>
-        <a class="btn" href="https://github.com/Etoile-Bleu/leonida-reviews" target="_blank" rel="noopener">Review table ↗</a>
+        <a class="btn" data-only="leonida" href="https://github.com/Etoile-Bleu/leonida-reviews" target="_blank" rel="noopener">Review table ↗</a>
+        <a class="btn" data-only="generic" href="@@REPO_URL@@/releases" target="_blank" rel="noopener">Releases ↗</a>
       </div>
       <div id="securityBody"><div class="pending"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading the review table…</b><p class="pending-msg"></p></div></div></div>
     </div>
@@ -887,9 +898,10 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <div>
           <div class="eyebrow">Part 2 · For contributors</div>
           <h2>Work board</h2>
-          <p class="lede">Every tracked item from the coordination issue and the D3D12 tracker: what's up for grabs, who has claimed what, and what waits for review. Claim work in the coordination issue, not here.</p>
+          <p class="lede" data-only="leonida">Every tracked item from the coordination issue and the D3D12 tracker: what's up for grabs, who has claimed what, and what waits for review. Claim work in the coordination issue, not here.</p>
+          <p class="lede" data-only="generic">The open issues of @@NAME@@, grouped by label, most recently active first: where the project asks for help, and what people report.</p>
         </div>
-        <a class="btn" id="claimLink" href="#" target="_blank" rel="noopener">Coordination issue ↗</a>
+        <a class="btn" id="claimLink" href="#" target="_blank" rel="noopener"><span data-only="leonida">Coordination issue ↗</span><span data-only="generic">Issues ↗</span></a>
       </div>
       <div id="workBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
     </div>
@@ -907,24 +919,35 @@ code.hash { word-break: break-all; font-size: 12.5px; }
       <div class="safety">
         <b>Stay safe: the short version</b>
         <ul>
-          <li>The game is <b>not playable yet</b>. Anything offered as a "playable build", "pre-patched exe" or "one-click installer" is fake and most likely malware.</li>
-          <li>Leonida is source code on GitHub, nothing else. It contains no game files and never asks you to download any.</li>
+          <li>The game is <b>not playable yet</b> on any PC project. Anything offered as a "playable build", "pre-patched exe" or "one-click installer" is fake and most likely malware.</li>
+          <li>@@NAME@@ is source code on GitHub, nothing else. A real project contains no game files and never asks you to download any.</li>
           <li>Never turn off your antivirus, run a stranger's script, or type a password or a payment detail because a download page tells you to.</li>
         </ul>
       </div>
       <div class="faq">
         <details>
-          <summary>What is Leonida, in one sentence?</summary>
-          <div class="a"><p>A community project that rebuilds an Xbox Series game so it runs natively on a Windows PC. You build it on your own PC from your own copy of the game.</p></div>
+          <summary>What is @@NAME@@, in one sentence?</summary>
+          <div class="a">
+            <p data-only="leonida">A community project that rebuilds an Xbox Series game so it runs natively on a Windows PC. You build it on your own PC from your own copy of the game.</p>
+            <p data-only="generic">@@KIND@@: @@KIND_ABOUT@@ <a href="@@REPO_URL@@" target="_blank" rel="noopener">Its repository</a> is the source; this page only reads it.</p>
+          </div>
+        </details>
+        <details>
+          <summary>How far is it right now?</summary>
+          <div class="a">
+            <p data-only="generic">Stage @@STAGE_N@@ of @@STAGE_TOTAL@@ on the shared ladder: <b>@@STAGE@@</b>. @@SUMMARY@@</p>
+            <p data-only="generic">Source: @@EVIDENCE@@. Read by hand on @@CHECKED@@; projects move fast, so check its commits for anything newer. <a href="../">How it compares with the others</a>.</p>
+            <p data-only="leonida">The road to playable above is read live from the project's status table. On the shared ladder it is at the stage shown under the ring; <a href="../">the standings</a> compare it with every other project.</p>
+          </div>
         </details>
         <details>
           <summary>Where do I download the game files?</summary>
           <div class="a">
-            <p>Not here. Leonida contains no game files and never links to them. It only works with a copy you already have, and this page won't point you to any other source.</p>
+            <p>Not here, and not from any of these projects. They work only with a copy you already have, and this page won't point you to any source.</p>
             <p>If someone sends you a link in a DM or a comment, treat it as a trap. Fake download sites are the oldest trick around a big release.</p>
           </div>
         </details>
-        <details>
+        <details data-only="leonida">
           <summary>Can I play once the game's executable is out?</summary>
           <div class="a">
             <p>No, not straight away. An Xbox runs a cut-down version of Windows on the same kind of processor as a PC, but the layer underneath is different. The game asks the console for things a normal PC doesn't have, and each of those requests has to be answered by Leonida first.</p>
@@ -934,54 +957,59 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <details>
           <summary>How do I check that my game_scarlett_master.exe is the right one?</summary>
           <div class="a">
-            <p>The port is built and tested against one executable. Compare your copy with it before you use it: if any value differs, it is another build or a changed file, so don't run it.</p>
+            <p>The projects are built and tested against one executable. Compare your copy with it before you use it: if any value differs, it is another build or a changed file, so don't run it.</p>
             <dl class="hashes">
               <div><dt>Size</dt><dd>120,181,760 bytes</dd></div>
               <div><dt>SHA-1</dt><dd><code class="hash">2be54b5e91275a2a8a0ba65b74eab51527933522</code></dd></div>
               <div><dt>SHA-256</dt><dd><code class="hash">e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993</code></dd></div>
             </dl>
-            <p>Several contributors checked the SHA-256 independently, and the project's own docs and its <code>tools/exe_sha.py</code> use it. The SHA-1 is from the same file.</p>
-            <p>On Windows, in PowerShell: <code>Get-FileHash game_scarlett_master.exe -Algorithm SHA1</code> (or <code>-Algorithm SHA256</code>). In the repository: <code>python -I tools/exe_sha.py "&lt;game&gt;\game_scarlett_master.exe"</code>.</p>
+            <p>Several contributors checked the SHA-256 independently, and Leonida's docs and its <code>tools/exe_sha.py</code> use it. The SHA-1 is from the same file.</p>
+            <p>On Windows, in PowerShell: <code>Get-FileHash game_scarlett_master.exe -Algorithm SHA1</code> (or <code>-Algorithm SHA256</code>).</p>
             <p>A matching hash only tells you the file is the one others tested. It doesn't make the place you got it from safe.</p>
           </div>
         </details>
         <details>
           <summary>How long until it's playable?</summary>
           <div class="a">
-            <p>Nobody knows yet: think weeks to months, not days. There's no unlocked Xbox Series to compare against, so the work is a loop: start the game, see where it stops, build the missing piece, start again.</p>
-            <p>Unpacking the game and translating its shaders are already done. The slow part is the graphics layer, which turns the console's DirectX 12 into Vulkan for PC graphics cards. The first days with the executable will give a much better estimate, and this page will show it as the stages move.</p>
+            <p data-only="leonida">Nobody knows yet: think weeks to months, not days. There's no unlocked Xbox Series to compare against, so the work is a loop: start the game, see where it stops, build the missing piece, start again.</p>
+            <p data-only="leonida">Unpacking the game and translating its shaders are already done. The slow part is the graphics layer, which turns the console's DirectX 12 into Vulkan for PC graphics cards.</p>
+            <p data-only="generic">Nobody knows. Every project works the same loop: start the game, see where it stops, build the missing piece, start again. The jumps between stages are uneven: a project can go from the first frame to the menus in hours and then spend weeks on the world.</p>
+            <p data-only="generic">Playable on this ladder means 30 minutes in the game without a crash at 20 frames a second or better. Speed is usually the last and longest part.</p>
           </div>
         </details>
         <details>
           <summary>What does the percentage at the top mean?</summary>
-          <div class="a"><p>It's a rough gauge built from the project's own status table, not a release date. Booting, the first frame, the open world and playing weigh the most, and they are the stages that start once developers have the executable.</p>
-            <p>It counts milestones, not hours of work. If booting turns out to be a lot of work, the number can sit still for weeks, and it drops when the project adds new stages or finds more DirectX calls to build. That doesn't mean things went backwards, only that the road turned out longer.</p></div>
+          <div class="a">
+            <p data-only="leonida">It's a rough gauge built from the project's own status table, not a release date. Booting, the first frame, the open world and playing weigh the most. It counts milestones, not hours of work, so it can sit still for weeks, and it drops when the project adds new stages or finds more DirectX calls to build.</p>
+            <p data-only="generic">Where the project's stage sits on the shared ladder, from 0% (groundwork) to 100% (playable), with a little extra for how far it is into its stage compared with the others there. It counts milestones, not hours of work, so it can sit still for a long time.</p>
+          </div>
         </details>
         <details>
           <summary>Someone shared a "playable" download. Is it legit?</summary>
           <div class="a">
-            <p>Check the top of this page. As long as it says the game doesn't boot, a playable download can't exist, so it is fake.</p>
-            <p>Even later, a virus scan alone isn't enough: someone who wants to hack people can build something that scans clean. Trust nothing you haven't built yourself from the project's own GitHub page, and don't blindly trust anyone who vouches for a file, including people who seem helpful.</p>
+            <p>Check <a href="../">the standings</a>. As long as no project is at "Playable", a playable download can't exist, so it is fake.</p>
+            <p>Even later, a virus scan alone isn't enough: someone who wants to hack people can build something that scans clean. Trust nothing you haven't built yourself from a project's own GitHub page, and don't blindly trust anyone who vouches for a file.</p>
           </div>
         </details>
-        <details>
+        <details data-only="leonida">
           <summary>Wouldn't an emulator for another console be easier?</summary>
           <div class="a"><p>Leonida doesn't emulate a console. It runs the game's own code directly on your PC and swaps in PC versions of the console's system software. For a game this size that's the route to good performance, and the project targets the Xbox Series version only.</p></div>
         </details>
-        <details>
+        <details data-only="leonida">
           <summary>Does it go online, or need an account?</summary>
           <div class="a"><p>No. The project's rules forbid any online service: no Xbox network, no publisher servers, no keys and no copy-protection workarounds. If something claiming to be Leonida asks you to sign in to anything, it isn't Leonida.</p></div>
         </details>
         <details>
           <summary>Can I help without writing code?</summary>
           <div class="a">
-            <p>Yes. A lot of work waits for someone to test it on a particular graphics card. The "Ready for review or a test" list in the work board above shows what's waiting. Clear bug reports and catching docs that are out of date help too.</p>
-            <p>Have experience with emulators, recompilation projects or graphics drivers? Read the contributing guide on GitHub and claim an item in the coordination issue.</p>
+            <p data-only="leonida">Yes. A lot of work waits for someone to test it on a particular graphics card. The "Ready for review or a test" list in the work board above shows what's waiting. Clear bug reports and catching docs that are out of date help too.</p>
+            <p data-only="leonida">Have experience with emulators, recompilation projects or graphics drivers? Read the contributing guide on GitHub and claim an item in the coordination issue.</p>
+            <p data-only="generic">Often, yes: test runs on graphics cards the authors don't have, and clear bug reports with the exact build you ran. The work board above lists the open issues; read the project's README for how it wants reports.</p>
           </div>
         </details>
         <details>
           <summary>Is this page official?</summary>
-          <div class="a"><p>No. It's an unofficial community dashboard that reads the project's public GitHub pages live in your browser. When it and GitHub disagree, GitHub is right.</p></div>
+          <div class="a"><p>No. It's an unofficial community dashboard that reads @@NAME@@'s public GitHub pages live in your browser. When it and GitHub disagree, GitHub is right.</p></div>
         </details>
       </div>
     </div>
@@ -990,7 +1018,7 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 
 <footer>
   <div class="wrap">
-    <div>Unofficial community dashboard. Everything on this page is read live from public GitHub data in your browser: the README's status table, the coordination issue and the D3D12 tracker. It contains no game data and no files from the game. Icon: the project's logo from its README, made by SlyDevil on SteamGridDB.</div>
+    <div>Unofficial community dashboard, part of <a href="../">Road to Playable</a>. Everything on this page is read live from public GitHub data in your browser<span data-only="leonida">: the README's status table, the coordination issue and the D3D12 tracker</span>. It contains no game data and no files from the game.<span data-only="leonida"> Icon: the project's logo from its README, made by SlyDevil on SteamGridDB.</span></div>
     <div id="rateTxt"></div>
     <details>
       <summary>Your GitHub token</summary>
@@ -1003,6 +1031,7 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 </footer>
 <div class="toast" id="toast"></div>
 
+<script type="application/json" id="project-config">@@CONFIG@@</script>
 <script>
 'use strict';
 
@@ -1010,11 +1039,14 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 const qs = new URLSearchParams(location.search);
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const BRANCH_RE = /^[A-Za-z0-9_./-]+$/;
-// The original repository went private on 2026-11-23; the work carries on in ubiquitarianism/leonida, which the page
-// follows unless ?repo= picks another repository (forks.js lists the forks that are moving).
-const HOME_REPO = 'ubiquitarianism/leonida';
+// Which project this copy of the page shows: build.py writes one config per project (repo, default branch, which
+// data sources it has, its place on the shared ladder). The page follows that repository unless ?repo= picks another
+// one (forks.js lists the forks that are moving).
+const CFG = JSON.parse(document.getElementById('project-config').textContent);
+const FEATURES = new Set(CFG.features || []);   // readme, coord, d3d, proof, security: Leonida's own data sources
+const HOME_REPO = CFG.repo;
 const REPO = REPO_RE.test(qs.get('repo') || '') ? qs.get('repo') : HOME_REPO;
-const BRANCH = BRANCH_RE.test(qs.get('branch') || '') ? qs.get('branch') : 'main';
+const BRANCH = BRANCH_RE.test(qs.get('branch') || '') ? qs.get('branch') : (CFG.branch || 'main');
 const GH = 'https://github.com/' + REPO;
 const SYNC_MS = 60 * 1000;              // one sync a minute while the tab is visible
 const STATUS_MS = 5 * 60 * 1000;       // README, coordination issue, activity
@@ -1597,11 +1629,19 @@ function renderHero(m) {
     head.textContent = (readme.headline ? readme.headline : 'Status table loaded') ;
     head.classList.toggle('ok', !/not|no /i.test(readme.headline));
   }
+  if (!FEATURES.has('readme')) {
+    $('#tagline').textContent = CFG.summary;
+    const head = $('#headline');
+    head.textContent = `Stage ${CFG.stageN} of ${CFG.ladder.length}: ${CFG.stageLabel}`;
+    head.classList.toggle('ok', CFG.stage === CFG.ladder[CFG.ladder.length - 1].key);
+  }
   if (stages) {
     countUp($('#pct'), pct);
     $('#ringBar').style.strokeDashoffset = String(RING_LEN * (1 - pct / 100));
     const done = stages.filter(s => s.status === 'done').length;
-    $('#ringSub').textContent = `${done} of ${stages.length} milestones done · booting and playing weigh the most`;
+    $('#ringSub').textContent = FEATURES.has('readme')
+      ? `${done} of ${stages.length} milestones done · booting and playing weigh the most`
+      : `${done} of ${stages.length} ladder stages done · now: ${CFG.stageLabel}`;
   }
   const translate = readme && readme.rows.find(r => /spir-?v translation/i.test(r.what));
   const shaderCount = translate && (translate.status.match(/All ([\d,]+) translated/i) || [])[1];
@@ -1868,8 +1908,9 @@ function renderItems() {
 /* ================= share ================= */
 let summary = '';
 function buildSummary(m) {
-  const lines = [`🌴 Leonida, road to playable: ${m.pct}%`];
-  if (m.stages) lines.push(`✅ ${m.stages.filter(s => s.status === 'done').length}/${m.stages.length} milestones done`);
+  const lines = [`🌴 ${CFG.name}, road to playable: ${m.pct}%`];
+  if (m.stages) lines.push(`✅ ${m.stages.filter(s => s.status === 'done').length}/${m.stages.length} ${FEATURES.has('readme') ? 'milestones' : 'ladder stages'} done`);
+  if (!FEATURES.has('readme')) lines.push(`📍 Stage ${CFG.stageN} of ${CFG.ladder.length}: ${CFG.stageLabel}`);
   const translate = m.readme && m.readme.rows.find(r => /spir-?v translation/i.test(r.what));
   const n = translate && (translate.status.match(/All ([\d,]+) translated/i) || [])[1];
   if (n) lines.push(`⚡ ${n} console shaders translated for PC GPUs`);
@@ -1954,8 +1995,8 @@ async function findCoordination() {
 async function loadStatus() {
   const since = new Date(Date.now() - 864e5).toISOString().slice(0, 13) + ':00:00Z';
   const [readmeR, coordR, repoR, contribR, commitsR, mergedR, openR, commitCountR] = await Promise.allSettled([
-    rawFile('README.md'),
-    findCoordination(),
+    FEATURES.has('readme') ? rawFile('README.md') : Promise.resolve(null),
+    FEATURES.has('coord') ? findCoordination() : Promise.resolve(null),
     api(`/repos/${REPO}`, d => ({ stars: d.stargazers_count, forks: d.forks_count, watchers: d.subscribers_count }), undefined, { maxAge: SLOW_MS }),
     api(`/repos/${REPO}/contributors?per_page=1&anon=1`, d => d.length, undefined, { maxAge: SLOW_MS }),
     api(`/repos/${REPO}/commits?sha=${encodeURIComponent(BRANCH)}&per_page=100`, d => d.map(c => ({
@@ -1969,7 +2010,9 @@ async function loadStatus() {
 
   const val = r => r.status === 'fulfilled' ? r.value : null;
   const m = {};
-  try { m.readme = parseReadme(val(readmeR).data); } catch (e) { showError('#journeyBody', 'Could not read the project status table', readmeR.reason || e); }
+  if (FEATURES.has('readme')) {
+    try { m.readme = parseReadme(val(readmeR).data); } catch (e) { showError('#journeyBody', 'Could not read the project status table', readmeR.reason || e); }
+  }
 
   let coord = null;
   const coordFound = val(coordR);
@@ -1981,17 +2024,19 @@ async function loadStatus() {
     $('#claimLink').href = coordIssue.html_url;
     latestCoordNo = coordIssue.number;
     latestCoordRecent = coordFound.recent;
-  } else if (!cacheOnly) console.error('[dashboard] coordination issue', coordR.reason);
+  } else if (FEATURES.has('coord') && !cacheOnly) console.error('[dashboard] coordination issue', coordR.reason);
   latestCoord = coord || latestCoord;
 
   let d3d = null;
-  const trackerNo = (coord && coord.d3dTracker) || D3D_TRACKER_FALLBACK;
-  const trackerRepo = coord && coord.d3dTracker ? REPO : D3D_TRACKER_SNAPSHOT_REPO;
-  d3dSnapshot = trackerRepo !== REPO;
-  try {
-    const r = await api(`/repos/${trackerRepo}/issues/${trackerNo}`, pickIssue, 'd3dtracker', { maxAge: SLOW_MS });
-    d3d = parseD3D(r.data.body);
-  } catch (e) { if (!cacheOnly) console.error('[dashboard] D3D tracker failed', e); }
+  if (FEATURES.has('d3d')) {
+    const trackerNo = (coord && coord.d3dTracker) || D3D_TRACKER_FALLBACK;
+    const trackerRepo = coord && coord.d3dTracker ? REPO : D3D_TRACKER_SNAPSHOT_REPO;
+    d3dSnapshot = trackerRepo !== REPO;
+    try {
+      const r = await api(`/repos/${trackerRepo}/issues/${trackerNo}`, pickIssue, 'd3dtracker', { maxAge: SLOW_MS });
+      d3d = parseD3D(r.data.body);
+    } catch (e) { if (!cacheOnly) console.error('[dashboard] D3D tracker failed', e); }
+  }
 
   if (d3d && d3d.methods.length) {
     m.coverage = d3d.methods.reduce((a, x) => ({ total: a.total + x.total, main: a.main + x.main, prs: a.prs + x.prs }), { total: 0, main: 0, prs: 0 });
@@ -1999,6 +2044,9 @@ async function loadStatus() {
   if (m.readme) {
     m.stages = buildStages(m.readme, m.coverage);
     m.pct = overall(m.stages);
+  } else if (!FEATURES.has('readme')) {
+    m.stages = ladderStages();
+    m.pct = Math.round(CFG.score);
   }
   const repo = val(repoR);
   const contrib = val(contribR);
@@ -2025,16 +2073,25 @@ async function loadStatus() {
   }
 
   renderHero(m);
-  if (m.stages) renderJourney(m.stages, m.pct);
-  try { renderBlockers(coord, d3d, m.stages); } catch (e) { showError('#blockersBody', 'Could not read the blockers', (!coordR.value && coordR.reason) || e); }
-  try { renderGraphics(d3d, m.coverage); } catch (e) { showError('#graphicsBody', 'Could not read the D3D12 tracker', e); }
   latestActivity = m.activity || latestActivity;
   try { renderPulse(m.activity, val(commitsR) && val(commitsR).data); } catch (e) { showError('#pulseBody', 'Could not load activity', mergedR.reason || e); }
-  try {
-    if (!coord && !d3d) throw (coordR.reason || new Error('No coordination issue found'));
-    buildBoard(coord, d3d);
-    renderWork(coord);
-  } catch (e) { showError('#workBody', 'Could not read the work board', e); }
+  if (!FEATURES.has('readme')) {
+    // A project without Leonida's own documents: the same sections, built from its ladder entry and its issues.
+    if (m.stages) renderLadderJourney(m.stages, m.pct);
+    renderLadderBlockers(m.stages);
+    renderProjectGraphics();
+    renderProjectProof();
+    await Promise.allSettled([renderIssues(), renderReleases()]);
+  } else {
+    if (m.stages) renderJourney(m.stages, m.pct);
+    try { renderBlockers(coord, d3d, m.stages); } catch (e) { showError('#blockersBody', 'Could not read the blockers', (!coordR.value && coordR.reason) || e); }
+    try { renderGraphics(d3d, m.coverage); } catch (e) { showError('#graphicsBody', 'Could not read the D3D12 tracker', e); }
+    try {
+      if (!coord && !d3d) throw (coordR.reason || new Error('No coordination issue found'));
+      buildBoard(coord, d3d);
+      renderWork(coord);
+    } catch (e) { showError('#workBody', 'Could not read the work board', e); }
+  }
 
   summary = m.pct != null ? buildSummary(m) : '';
   return [readmeR, coordR, mergedR].some(r => r.status === 'rejected');
@@ -2060,18 +2117,6 @@ function init() {
 // live.js loads after this script and holds the scheduler; start once both have run.
 document.addEventListener('DOMContentLoaded', init);
 </script>
-<script src="coord.js"></script>
-<script src="live.js"></script>
-<script src="activity.js"></script>
-<script src="pipeline.js"></script>
-<script src="triage.js"></script>
-<script src="security.js"></script>
-<script src="proof.js"></script>
-<script src="hardware-model.js"></script>
-<script src="hardware.js"></script>
-<script src="forks.js"></script>
-<script src="../assets/scrub.js"></script>
-<script src="../assets/ladder.js"></script>
-<script src="race.js"></script>
+@@SCRIPTS@@
 </body>
 </html>

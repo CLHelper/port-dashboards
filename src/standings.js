@@ -26,3 +26,21 @@
     })
     .catch(err => console.warn('standings: live push times unavailable, showing the build-time ones:', err.message));
 })();
+
+/* The ring's number counts up while the ring fills (the CSS animation in site.css). */
+(function () {
+  'use strict';
+  const el = document.querySelector('.ring-center .pct[data-count]');
+  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const to = Number(el.dataset.count);
+  const small = el.querySelector('small').outerHTML;
+  const DURATION_MS = 1400;
+  const start = performance.now();
+  const step = now => {
+    const t = Math.min(1, (now - start) / DURATION_MS);
+    const v = to * (1 - Math.pow(1 - t, 3));
+    el.innerHTML = (t < 1 ? Math.round(v) : to) + small;
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+})();

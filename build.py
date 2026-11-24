@@ -3,9 +3,12 @@
     python -I build.py            # writes docs/
     python -I build.py --check    # builds into a temporary folder and only reports problems
 
-Standard library only. The site has one standings page (docs/index.html), one generated dashboard per project
-(docs/<slug>/index.html) and, for a project with a hand-made dashboard (`custom` in projects.json), a copy of that
-folder (docs/<slug>/). Every page carries the same project switcher.
+Standard library only. The site has one standings page (docs/index.html) and one full live dashboard per project
+(docs/<slug>/index.html), all from the same engine in src/full/ (page.html and its scripts, served once from
+docs/assets/full/). Each page gets its project's config: repository, branch, its place on the ladder and which of
+Leonida's own data sources it has (`features`); sections without such a source are built from the ladder entry and
+the project's repository instead (src/full/project.js). `data-only="leonida"` / `data-only="generic"` elements in
+the template are kept for one kind of page and dropped from the other.
 
 House rule: the game's title, its studio, publisher and places never appear in this repository or in the built
 pages. Text from GitHub is masked in the browser (src/scrub.js); text written here must not contain them, and repo
@@ -34,7 +37,12 @@ PROJECT_FIELDS = ("repo", "slug", "name", "kind", "stage", "within", "status", "
 STATUSES = ("active", "halted", "blocked", "no-work")
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
 REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-SHARED_ASSETS = ("site.css", "ladder.css", "scrub.js", "ladder.js", "switcher.js", "project.js", "standings.js")
+SHARED_ASSETS = ("site.css", "ladder.css", "scrub.js", "ladder.js", "switcher.js", "standings.js")
+FULL = os.path.join(SRC, "full")
+FEATURES = ("readme", "coord", "d3d", "proof", "security", "gone")   # Leonida's own data sources and its notice
+STATUS_LABEL = {"active": "Active", "halted": "Halted", "blocked": "Blocked", "no-work": "Nothing published"}
+ONLY_RE = re.compile(r'<(p|details|span|a|h2|div)\b[^>]*\bdata-only="(leonida|generic)"[^>]*>.*?</\1>', re.S)
+FEATURE_RE = re.compile(r'<(aside|section|a)\b[^>]*\bdata-feature="(\w+)"[^>]*>.*?</\1>', re.S)
 
 
 class BuildError(Exception):
@@ -83,9 +91,11 @@ def validate(data):
             raise BuildError(f"project {p['slug']}: unknown status {p['status']!r}")
         if not isinstance(p["within"], (int, float)) or not 0 <= p["within"] < 1:
             raise BuildError(f"project {p['slug']}: within must be in [0, 1)")
-        custom = p.get("custom")
-        if custom and not os.path.isfile(os.path.join(ROOT, custom, "index.html")):
-            raise BuildError(f"project {p['slug']}: custom dashboard {custom}/index.html not found")
+        unknown = [f for f in p.get("features", []) if f not in FEATURES]
+        if unknown:
+            raise BuildError(f"project {p['slug']}: unknown features {unknown}")
+        if p.get("base") and not any(q["repo"] == p["base"] for q in data.get("projects", [])):
+            raise BuildError(f"project {p['slug']}: base {p['base']!r} is not a tracked project")
         for field in ("name", "summary", "evidence", "caveat"):
             if isinstance(p.get(field), str) and NAMED.search(p[field]):
                 raise BuildError(f"project {p['slug']}: {field} names the game; write 'the game'")
@@ -284,6 +294,7 @@ def build_standings(data):
         "answer_class": "yes" if playable else "no",
         "count": str(len(data["projects"])),
         "leader_score": f'{leader["score"]:g}',
+        "leader_dash": f'{540.35 * (1 - leader["score"] / 100):.2f}',
         "leader_name": esc(leader["name"]),
         "leader_href": f'{esc(leader["slug"])}/',
         "leader_stage": esc(furthest["label"]),
@@ -303,49 +314,69 @@ def build_standings(data):
                 SITE_URL, "", body, ["scrub.js", "ladder.js", "switcher.js", "standings.js"], json_for_script(payload))
 
 
+def keep_variant(page_html, generic, features):
+    """Drops the template elements meant for the other kind of page and the sections of features it lacks."""
+    drop = "leonida" if generic else "generic"
+    page_html = ONLY_RE.sub(lambda m: "" if m.group(2) == drop else m.group(0), page_html)
+    return FEATURE_RE.sub(lambda m: m.group(0) if m.group(2) in features else "", page_html)
+
+
+def full_scripts(features):
+    names = (["coord.js"] if "coord" in features else []) + ["live.js", "activity.js", "pipeline.js", "triage.js"]
+    names += ["security.js"] if "security" in features else []
+    names += ["proof.js"] if "proof" in features else []
+    names += [] if "readme" in features else ["project.js"]
+    names += ["hardware-model.js", "hardware.js", "forks.js"]
+    tags = [f'<script src="../assets/full/{n}"></script>' for n in names]
+    tags += ['<script src="../assets/scrub.js"></script>', '<script src="../assets/ladder.js"></script>',
+             '<script src="../assets/full/race.js"></script>']
+    return "\n".join(tags)
+
+
 def build_project(data, p, ranked):
-    prefix = "../"
     ladder = data["ladder"]
     stage = stage_of(data, p["stage"])
-    s = score(p, ladder)
+    features = set(p.get("features", []))
+    generic = "readme" not in features
     kind = data["kinds"][p["kind"]]
-    entry = next((q for q in ranked if q["slug"] == p["slug"]), None)
-    position = (f'#{entry["rank"]}{"=" if entry["tied"] else ""} of {len(ranked)}' if entry else "not ranked")
     base = next((q for q in data["projects"] if q["repo"] == p.get("base")), None) if p.get("base") else None
-    body = fill(read_src("project.html"), {
-        "topbar": topbar(data, p["slug"], prefix),
-        "name": esc(p["name"]),
-        "repo": esc(p["repo"]),
-        "repo_url": esc(repo_url(p["repo"])),
-        "kind": esc(kind["label"]),
-        "kind_about": esc(kind["about"]),
-        "badge": badge(p),
-        "summary": esc(p["summary"]),
-        "facts": facts(p),
-        "score": f"{s:g}",
-        "dash": f"{540.35 * (1 - s / 100):.2f}",
-        "stage_n": str(stage_number(data, p["stage"])),
-        "stage_total": str(len(ladder)),
-        "stage": esc(stage["label"]),
-        "stage_means": esc(stage["means"]),
-        "position": position,
-        "base_block": (f'<p class="base-line">Builds on <a href="{prefix}{esc(base["slug"])}/">{esc(base["name"])}</a>; '
-                       f'the <a href="#upstream">upstream</a> section compares the two.</p>' if base else ""),
-        "upstream_section": read_src("upstream.html") if base else "",
-        "checked": esc(data["checked"]),
-    })
-    payload = {
-        "ladder": ladder,
-        "project": {k: p.get(k) for k in ("repo", "slug", "name", "kind", "base", "stage", "status")},
-        "base": {"repo": base["repo"], "name": base["name"]} if base else None,
-        "markers": markers(data, ranked, prefix),
-        "highlight": p["slug"],
-        "self": {"name": p["name"], "score": s, "avatar": p.get("avatar"), "href": "./", "slug": p["slug"]},
+    config = {
+        "slug": p["slug"], "name": p["name"], "repo": p["repo"], "branch": p.get("branch") or "main",
+        "features": sorted(features), "ladder": ladder, "stage": p["stage"], "stageN": stage_number(data, p["stage"]),
+        "stageLabel": stage["label"], "within": p["within"], "score": score(p, ladder), "summary": p["summary"],
+        "evidence": p["evidence"], "caveat": p.get("caveat"), "tested_on": p.get("tested_on"),
+        "backend": p.get("backend"), "shader_path": p.get("shader_path"), "language": p.get("language"),
+        "kindLabel": kind["label"], "status": p["status"], "statusLabel": STATUS_LABEL[p["status"]],
+        "checked": data["checked"],
+        "base": {"repo": base["repo"], "name": base["name"], "slug": base["slug"]} if base else None,
     }
-    return page(f'{p["name"]}: Road to Playable',
-                f'{p["name"]}: stage {stage_number(data, p["stage"])} of {len(ladder)}, {stage["label"]}. {p["summary"]}',
-                f'{SITE_URL}{p["slug"]}/', prefix, body,
-                ["scrub.js", "ladder.js", "switcher.js", "project.js"], json_for_script(payload))
+    og = ""
+    if os.path.isfile(os.path.join(ROOT, "projects", p["slug"], "og-image.png")):
+        img = f'{SITE_URL}{p["slug"]}/og-image.png?v={data["checked"]}'
+        og = (f'<meta property="og:image" content="{esc(img)}">\n<meta property="og:image:width" content="1200">\n'
+              f'<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">\n'
+              f'<meta name="twitter:image" content="{esc(img)}">')
+    template = keep_variant(read_text(os.path.join(FULL, "page.html")), generic, features)
+    values = {
+        "NAME": esc(p["name"]), "URL": esc(f'{SITE_URL}{p["slug"]}/'), "OG_IMAGE": og,
+        "DESCRIPTION": esc(f'{p["name"]}, live: stage {stage_number(data, p["stage"])} of {len(ladder)} '
+                           f'({stage["label"]}) on the road to playable, its pull requests, activity and open issues.'),
+        "REPO_URL": esc(repo_url(p["repo"])), "KIND": esc(kind["label"]), "KIND_ABOUT": esc(kind["about"]),
+        "STAGE_N": str(stage_number(data, p["stage"])), "STAGE_TOTAL": str(len(ladder)), "STAGE": esc(stage["label"]),
+        "SUMMARY": esc(p["summary"]), "EVIDENCE": esc(p["evidence"]), "CHECKED": esc(data["checked"]),
+        "CONFIG": json_for_script(config), "SCRIPTS": full_scripts(features),
+    }
+
+    def sub(m):
+        if m.group(1) not in values:
+            raise BuildError(f"page.html placeholder @@{m.group(1)}@@ has no value")
+        return values[m.group(1)]
+    return re.sub(r"@@([A-Z_]+)@@", sub, template)
+
+
+def read_text(path):
+    with open(path, encoding="utf-8") as f:
+        return f.read()
 
 
 # ---------- output ----------
@@ -377,12 +408,13 @@ def build(out):
                             for p in ranked],
               "projects": [{k: p.get(k) for k in ("slug", "name", "stage", "within")} for p in data["projects"]]}
     write(os.path.join(out, "data.json"), json_for_script(public))
+    shutil.copytree(FULL, os.path.join(out, "assets", "full"), ignore=shutil.ignore_patterns("page.html"))
     for p in data["projects"]:
         target = os.path.join(out, p["slug"])
-        if p.get("custom"):
-            shutil.copytree(os.path.join(ROOT, p["custom"]), target)
-        else:
-            write(os.path.join(target, "index.html"), build_project(data, p, ranked))
+        write(os.path.join(target, "index.html"), build_project(data, p, ranked))
+        extras = os.path.join(ROOT, "projects", p["slug"])
+        if os.path.isdir(extras):
+            shutil.copytree(extras, target, dirs_exist_ok=True)
     scan(out)
     return data, ranked
 

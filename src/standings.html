@@ -1,12 +1,30 @@
 {{topbar}}
 <main>
   <section class="hero">
-    <div class="wrap">
-      <div class="eyebrow"><span class="dot"></span> Live standings</div>
-      <h1>Does it run on PC yet? <span class="answer {{answer_class}}">{{answer}}</span></h1>
-      <p class="tagline">{{count}} open projects try to run the same Xbox Series game natively on a PC: compatibility layers,
-        recompilers, emulators and boot harnesses. Each is placed on one ladder from groundwork to playable, from what
-        its own README and commits report.</p>
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> Live standings</div>
+        <h1>Does it run on PC yet? <span class="answer {{answer_class}}">{{answer}}</span></h1>
+        <p class="tagline">{{count}} open projects try to run the same Xbox Series game natively on a PC: compatibility layers,
+          recompilers, emulators and boot harnesses. Each is placed on one ladder from groundwork to playable, from what
+          its own README and commits report.</p>
+      </div>
+      <a class="ring-col ring-link" href="{{leader_href}}" title="The leader's dashboard">
+        <div class="ring-box">
+          <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffd166"/><stop offset=".45" stop-color="#ff9a3c"/><stop offset="1" stop-color="#ff3d8b"/>
+            </linearGradient></defs>
+            <circle class="track" cx="100" cy="100" r="86"/>
+            <circle class="bar fill-in" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="{{leader_dash}}" style="--to:{{leader_dash}}"/>
+          </svg>
+          <div class="ring-center">
+            <div class="pct" data-count="{{leader_score}}">{{leader_score}}<small>%</small></div>
+            <div class="lbl">Closest to playable</div>
+            <div class="sub">{{leader_name}} · {{leader_stage}}</div>
+          </div>
+        </div>
+      </a>
     </div>
   </section>
 

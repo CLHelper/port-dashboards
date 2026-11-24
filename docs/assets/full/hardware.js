@@ -400,7 +400,7 @@ function hwSyncSlider() {
 
 async function hwCatalog() {
   try {
-    const res = await fetch('hardware.json');
+    const res = await fetch('../assets/full/hardware.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } catch (e) {

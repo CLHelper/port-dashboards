@@ -1,88 +1,2105 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Xbox2Windows: Road to Playable</title><meta name="description" content="Xbox2Windows: stage 5 of 8, Menus. A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified."><meta property="og:type" content="website"><meta property="og:title" content="Xbox2Windows: Road to Playable"><meta property="og:description" content="Xbox2Windows: stage 5 of 8, Menus. A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified."><meta property="og:url" content="https://clhelper.github.io/port-dashboards/xbox2windows/"><meta name="theme-color" content="#0a0718"><link rel="icon" href="../assets/favicon-64.png" sizes="64x64" type="image/png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/ladder.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xbox2Windows · Road to Playable</title>
+<meta name="description" content="Xbox2Windows, live: stage 5 of 8 (Menus) on the road to playable, its pull requests, activity and open issues.">
+<meta property="og:title" content="Xbox2Windows · Road to Playable">
+<meta property="og:description" content="Xbox2Windows, live: stage 5 of 8 (Menus) on the road to playable, its pull requests, activity and open issues.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Road to Playable">
+<meta property="og:url" content="https://clhelper.github.io/port-dashboards/xbox2windows/">
+
+<meta name="twitter:title" content="Xbox2Windows · Road to Playable">
+<meta name="twitter:description" content="Xbox2Windows, live: stage 5 of 8 (Menus) on the road to playable, its pull requests, activity and open issues.">
+<meta name="theme-color" content="#0a0718">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../assets/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="../assets/favicon-180.png">
+<link rel="stylesheet" href="../assets/ladder.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0a0718;
+  --bg2: #130c2c;
+  --card: rgba(255, 255, 255, .045);
+  --card-hi: rgba(255, 255, 255, .075);
+  --line: rgba(255, 255, 255, .10);
+  --text: #f5f0ff;
+  --muted: #a99fc9;
+  --dim: #6f6790;
+  --pink: #ff3d8b;
+  --orange: #ff9a3c;
+  --sun: #ffd166;
+  --teal: #2ee6c8;
+  --violet: #8b5cf6;
+  --done: #2ee6c8;
+  --wip: #ffb648;
+  --research: #a78bfa;
+  --todo: #ff4d6d;
+  --radius: 18px;
+  --display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --body: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 var(--body);
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font: 500 .86em var(--mono); background: rgba(255,255,255,.07); padding: .08em .35em; border-radius: 6px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+/* ---------- top bar ---------- */
+/* Solid, not a backdrop blur: a blur behind a sticky bar is redrawn on every scrolled frame (slow on integrated GPUs). */
+.topbar { position: sticky; top: 0; z-index: 20; background: rgba(10,7,24,.97); border-bottom: 1px solid var(--line); }
+.topbar > .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { font: 900 15px var(--display); letter-spacing: .14em; text-transform: uppercase;
+  background: linear-gradient(90deg, var(--pink), var(--orange)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav { display: flex; gap: 18px; margin-left: 8px; font-size: 14px; }
+.nav a { color: var(--muted); white-space: nowrap; }
+.nav a:hover { color: var(--text); text-decoration: none; }
+.live { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.dot { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--teal); }
+/* The ring grows and fades with transform and opacity only: an animated box-shadow repaints the whole page every frame. */
+.dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: rgba(46,230,200,.7); animation: pulse 2s infinite; }
+.dot.stale { background: var(--wip); }
+.dot.err { background: var(--todo); }
+.dot.stale::after, .dot.err::after { animation: none; opacity: 0; }
+@keyframes pulse { 0% { transform: scale(1); opacity: .7; } 70%, 100% { transform: scale(3.2); opacity: 0; } }
+.btn { font: 500 13px var(--body); color: var(--text); background: var(--card-hi); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; white-space: nowrap; }
+.btn:hover { background: rgba(255,255,255,.12); }
+.btn.primary { background: linear-gradient(90deg, var(--pink), var(--orange)); border: 0; color: #1a0816; font-weight: 700; }
+/* Below this the menu gets its own scrolling row: on one row with the status it doesn't fit without wrapping its links. */
+@media (max-width: 1180px) {
+  .topbar > .wrap { flex-wrap: wrap; height: auto; row-gap: 6px; padding-top: 10px; padding-bottom: 8px; }
+  .nav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding-bottom: 2px; }
+}
+@media (max-width: 520px) { .live .txt { display: none; } }
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; padding: 64px 0 120px;
+  background:
+    radial-gradient(1000px 520px at 78% 18%, rgba(255,61,139,.30), transparent 60%),
+    radial-gradient(800px 480px at 10% 0%, rgba(139,92,246,.28), transparent 60%),
+    linear-gradient(180deg, #120a2e 0%, var(--bg) 100%); }
+.hero::after { /* neon grid floor */
+  content: ""; position: absolute; left: -50%; right: -50%; bottom: -40px; height: 260px;
+  background:
+    linear-gradient(transparent 0 calc(100% - 1px), rgba(255,61,139,.45) 0) 0 0 / 100% 34px,
+    linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(255,61,139,.45) 0) 0 0 / 60px 100%;
+  transform: perspective(320px) rotateX(62deg); transform-origin: bottom;
+  mask-image: linear-gradient(transparent, #000 70%); -webkit-mask-image: linear-gradient(transparent, #000 70%);
+  pointer-events: none; }
+.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center; }
+@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } .hero { padding-top: 40px; } }
+.eyebrow { font: 700 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--orange); }
+h1 { font: 900 clamp(44px, 7.4vw, 92px)/.95 var(--display); margin: 14px 0 18px; letter-spacing: -.01em; }
+h1 .grad { background: linear-gradient(95deg, var(--sun), var(--orange) 35%, var(--pink) 70%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tagline { font-size: clamp(17px, 2vw, 20px); color: #d9d0f5; max-width: 620px; margin: 0 0 22px; }
+.headline { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; padding: 8px 16px; border-radius: 999px;
+  background: rgba(255,77,109,.14); border: 1px solid rgba(255,77,109,.45); color: #ffd3dc; }
+.headline.ok { background: rgba(46,230,200,.12); border-color: rgba(46,230,200,.45); color: #c9fff5; }
+.chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 28px; max-width: 640px; }
+@media (max-width: 520px) { .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chip { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.chip b { display: block; font: 700 24px var(--display); letter-spacing: -.02em; }
+.chip span { font-size: 12.5px; color: var(--muted); }
+.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+.ring-box { position: relative; display: grid; place-items: center; aspect-ratio: 1; max-width: 440px; width: 100%; margin: 0 auto; }
+.sun { position: absolute; inset: 8%; border-radius: 50%; overflow: hidden; opacity: .26;
+  background: linear-gradient(180deg, var(--sun), var(--orange) 45%, var(--pink) 85%); }
+.sun::after { content: ""; position: absolute; left: 0; right: 0; top: 52%; bottom: 0;
+  background: repeating-linear-gradient(180deg, transparent 0 12px, var(--bg) 12px 18px); }
+.ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 16; }
+.ring .track { stroke: rgba(255,255,255,.08); }
+.ring .bar { stroke: url(#ringGrad); stroke-linecap: round; transition: stroke-dashoffset 1.6s cubic-bezier(.2,.8,.2,1); }
+.ring-box::before { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 80px rgba(255,61,139,.25); pointer-events: none; }
+.ring-note { max-width: 400px; margin: 14px auto 0; text-align: center; font-size: 13px; line-height: 1.5; color: var(--muted); }
+body.card-mode .ring-note, body.card-mode .forks { display: none; }
+.forks { scroll-margin-top: 110px; max-width: 440px; margin: 22px auto 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+@media (max-width: 700px) { .forks { scroll-margin-top: 190px; } }
+.fk-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 14px; }
+.fk-head span { font: 500 11px var(--mono); color: var(--dim); }
+.fk-lede, .fk-now, .fk-empty { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 6px 0 10px; }
+.fk-list { display: grid; gap: 6px; }
+.fk-row { display: grid; gap: 3px; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; color: var(--text); min-width: 0; }
+.fk-row:hover { background: var(--card-hi); border-color: var(--line); text-decoration: none; }
+.fk-row.on { border-color: rgba(255,154,60,.55); background: var(--card-hi); }
+.fk-name { font: 600 13px var(--mono); overflow-wrap: anywhere; }
+.fk-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; color: var(--muted); }
+.fk-tag.good { color: var(--done); }
+.fk-note { font-size: 11.5px; color: var(--dim); margin: 10px 0 0; }
+.ring-center { position: relative; text-align: center; }
+.ring-center .pct { font: 900 clamp(64px, 10vw, 112px)/1 var(--display); letter-spacing: -.04em; }
+.ring-center .pct small { font-size: .42em; color: var(--muted); }
+.ring-center .lbl { font: 700 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--orange); margin-top: 6px; }
+.ring-center .sub { font-size: 13px; color: var(--muted); margin-top: 8px; max-width: 220px; margin-inline: auto; }
+
+/* ---------- sections ---------- */
+section { padding: 64px 0 8px; }
+.sec-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 26px; }
+h2 { font: 800 clamp(28px, 4vw, 44px)/1.05 var(--display); margin: 6px 0 0; letter-spacing: -.015em; }
+.lede { color: var(--muted); max-width: 720px; margin: 10px 0 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.err-box { border: 1px dashed rgba(255,77,109,.5); color: #ffc2cf; background: rgba(255,77,109,.07); border-radius: 14px; padding: 16px; }
+.skeleton { height: 160px; border-radius: var(--radius); background: linear-gradient(90deg, var(--card), var(--card-hi), var(--card)); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* journey */
+.acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1080px) { .acts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .acts { grid-template-columns: 1fr; } }
+.act { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.act-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.act-no { font: 700 11px var(--mono); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+.act h3 { font: 700 18px/1.2 var(--display); margin: 2px 0 0; }
+.act-pct { font: 700 22px var(--display); }
+.meter { height: 8px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; display: flex; }
+.meter i { display: block; height: 100%; transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+.meter .m-done { background: var(--done); }
+.meter .m-wip { background: var(--wip); }
+.meter .m-grab { background: var(--pink); }
+.stage { display: grid; grid-template-columns: 38px 1fr; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(0,0,0,.18); border: 1px solid transparent; }
+.stage.done { border-color: rgba(46,230,200,.25); }
+.stage.wip, .stage.research { border-color: rgba(255,182,72,.28); }
+.stage .ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: rgba(255,255,255,.06); }
+.stage.done .ico { background: rgba(46,230,200,.14); }
+.stage.wip .ico, .stage.research .ico { background: rgba(255,182,72,.14); }
+.stage.todo .ico { filter: grayscale(.8); opacity: .7; }
+.stage h4 { margin: 0; font: 700 15px/1.25 var(--body); }
+.stage p { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); }
+.pill { display: inline-block; font: 700 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; margin-top: 8px; }
+.pill.done { color: var(--done); background: rgba(46,230,200,.12); }
+.pill.wip { color: var(--wip); background: rgba(255,182,72,.12); }
+.pill.research { color: var(--research); background: rgba(167,139,250,.14); }
+.pill.todo { color: var(--todo); background: rgba(255,77,109,.12); }
+details.more summary { cursor: pointer; font-size: 12.5px; color: var(--dim); margin-top: 6px; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "▸ "; }
+details.more[open] summary::before { content: "▾ "; }
+details.more div { font-size: 12.5px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+.footnote { font-size: 12.5px; color: var(--dim); margin-top: 14px; }
+
+/* blockers */
+.blockers { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+@media (max-width: 900px) { .blockers { grid-template-columns: 1fr; } }
+.big-block { position: relative; overflow: hidden; border-radius: var(--radius); padding: 26px; border: 1px solid rgba(255,77,109,.45);
+  background: radial-gradient(600px 300px at 100% 0%, rgba(255,77,109,.25), transparent 60%), var(--card); }
+.big-block .tag { font: 700 11px var(--mono); letter-spacing: .2em; color: var(--todo); text-transform: uppercase; }
+.big-block h3 { font: 800 clamp(22px, 3vw, 30px)/1.15 var(--display); margin: 10px 0; }
+.big-block p { color: #e2d9f7; margin: 0; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.li { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-size: 14px; }
+.li .k { font: 700 11px var(--mono); padding: 4px 8px; border-radius: 8px; background: rgba(255,77,109,.14); color: #ffb3c3; white-space: nowrap; }
+.li .k.amber { background: rgba(255,182,72,.14); color: var(--wip); }
+.li .k.violet { background: rgba(139,92,246,.18); color: #cbb8ff; }
+.li .waits { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
+.pressure { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.pressure .chip b { font-size: 22px; }
+.subhead { font: 700 12px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+
+/* graphics */
+.gfx { display: grid; grid-template-columns: .8fr 1.2fr; gap: 16px; }
+@media (max-width: 900px) { .gfx { grid-template-columns: 1fr; } }
+.gfx-big > b { font: 900 clamp(48px, 7vw, 76px)/1 var(--display); letter-spacing: -.03em; background: linear-gradient(90deg, var(--teal), #8ff7e6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gfx-big .of { font-size: 18px; color: var(--muted); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 14px 0; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.iface { display: grid; grid-template-columns: minmax(140px, 220px) 1fr 70px; gap: 12px; align-items: center; font-size: 13.5px; padding: 6px 0; }
+.iface .name { font: 500 12.5px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iface .n { text-align: right; color: var(--muted); font: 500 12.5px var(--mono); }
+.stack { height: 14px; border-radius: 99px; background: rgba(255,255,255,.07); display: flex; overflow: hidden; }
+.stack i { height: 100%; }
+@media (max-width: 520px) { .iface { grid-template-columns: 1fr 56px; } .iface .stack { grid-column: 1 / -1; grid-row: 2; } }
+.objs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.obj { font: 500 12px var(--mono); padding: 5px 10px; border-radius: 99px; border: 1px solid var(--line); }
+.obj.done { border-color: rgba(46,230,200,.5); color: var(--done); }
+.obj.pr { border-color: rgba(255,182,72,.5); color: var(--wip); }
+.obj.none { color: var(--dim); }
+.proof-stack { margin-top: 22px; }
+.proof-legend { gap: 8px 16px; }
+.proof-legend b { color: var(--text); font-weight: 600; }
+.proof-list { margin: 0; padding-left: 18px; font: 500 12.5px var(--mono); color: var(--muted); columns: 2 220px; column-gap: 24px; }
+.proof-list li { break-inside: avoid; padding: 2px 0; overflow-wrap: anywhere; }
+.proof-list .more { list-style: none; color: var(--dim); }
+.proof-num { display: flex; align-items: baseline; gap: 14px; margin: 10px 0 4px; }
+.proof-num b { font: 900 clamp(34px, 5vw, 48px)/1 var(--display); letter-spacing: -.02em; }
+.proof-num b.good { color: var(--done); }
+.proof-num b.bad { color: var(--wip); }
+.proof-num span { color: var(--muted); }
+.hw { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 900px) { .hw { grid-template-columns: 1fr; } }
+.hw-form { display: grid; gap: 14px; align-content: start; }
+.hw-field { display: grid; gap: 6px; font: 700 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.hw-field select, .hw-field input[type="search"], .hw-field input[type="text"], .hw-field input[type="number"] {
+  font: 500 14px var(--body); letter-spacing: 0; text-transform: none; color: var(--text); background: rgba(255,255,255,.06);
+  border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; width: 100%; min-width: 0; }
+.hw-field select { color-scheme: dark; }
+.hw-field select option, .hw-field select optgroup { background: #17122b; color: var(--text); }
+.hw-field select optgroup { color: var(--muted); }
+.hw-field input:focus-visible, .hw-field select:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+.hw-field[hidden], .hw-note[hidden], .hw-reason[hidden] { display: none; }
+.hw-count { font: 500 12px var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); }
+.hw-ram-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hw-ram-top input[type="number"] { width: 90px; }
+.hw-field input[type="range"] { width: 100%; accent-color: var(--teal); }
+.hw-verdict { display: block; font: 800 clamp(24px, 3.4vw, 34px)/1.15 var(--display); letter-spacing: -.02em; }
+.hw-verdict[data-tone="good"] { color: var(--done); }
+.hw-verdict[data-tone="mid"] { color: var(--wip); }
+.hw-verdict[data-tone="bad"] { color: var(--todo); }
+.hw-result .of { color: var(--muted); margin-top: 6px; }
+.hw-reason { margin: 12px 0 0; }
+.hw-rows { margin: 16px 0 0; display: grid; gap: 8px; }
+.hw-rows div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.hw-rows dt { font-weight: 700; }
+.hw-rows dt span { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
+.hw-rows dd { margin: 0; font: 700 13px var(--mono); white-space: nowrap; }
+.hw-rows dd[data-status="above"], .hw-rows dd[data-status="near"] { color: var(--done); }
+.hw-rows dd[data-status="uncertain"], .hw-rows dd[data-status="unknown"] { color: var(--wip); }
+.hw-rows dd[data-status="below"], .hw-rows dd[data-status="outside"] { color: var(--todo); }
+.hw-note { margin: 10px 0 0; color: var(--muted); }
+.hw-sources { margin-top: 12px; font-size: 13px; color: var(--muted); }
+.hw-sources summary { cursor: pointer; color: var(--text); }
+.hw-sources ul { padding-left: 18px; }
+.milestones { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 6px; margin-top: 16px; }
+@media (max-width: 700px) { .milestones { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+.ms { border-radius: 12px; padding: 10px; background: rgba(0,0,0,.2); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.ms b { display: block; font: 800 15px var(--display); color: var(--text); }
+
+/* pulse */
+.pulse-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 16px; }
+@media (max-width: 900px) { .pulse-grid { grid-template-columns: 1fr; } }
+.bars { display: flex; align-items: end; gap: 4px; height: 150px; margin-top: 14px; }
+.bars .hr { flex: 1; min-width: 0; height: 100%; display: flex; align-items: end; gap: 1px; }
+.bars .hr i { flex: 1; min-width: 0; min-height: 2px; border-radius: 4px 4px 1px 1px; transition: height 1s; }
+.bars .hr i.m { background: linear-gradient(180deg, var(--pink), var(--violet)); }
+.bars .hr i.o { background: var(--sun); opacity: .7; }
+.bars .hr:hover i { filter: brightness(1.3); }
+.bars .hr.unknown i { height: 100% !important; background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 4px, transparent 4px 8px); opacity: 1; }
+.bars-legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+.bars-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
+.bars-axis { display: flex; justify-content: space-between; font: 500 11px var(--mono); color: var(--dim); margin-top: 6px; }
+.feed { display: flex; flex-direction: column; gap: 2px; max-height: 420px; overflow: auto; margin-top: 10px; }
+.feed a.row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; color: var(--text); font-size: 13.5px; }
+.feed a.row:hover { background: var(--card-hi); text-decoration: none; }
+.feed img, .people img { width: 28px; height: 28px; border-radius: 50%; background: var(--card-hi); }
+.feed .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed .when { font: 500 11.5px var(--mono); color: var(--dim); }
+.people { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.people a { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; color: var(--text); font-size: 14px; }
+.people .c { font: 700 12px var(--mono); color: var(--orange); }
+
+/* work board */
+.cats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+@media (max-width: 1000px) { .cats { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 520px) { .cats { grid-template-columns: 1fr; } }
+.cat { text-align: left; cursor: pointer; color: var(--text); font: inherit; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.cat:hover, .cat.on { background: var(--card-hi); border-color: rgba(255,61,139,.5); }
+.cat .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.cat .nm { font: 700 14.5px var(--body); }
+.cat .tot { font: 700 20px var(--display); }
+.cat .meter { margin: 10px 0 8px; }
+.cat .bk { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.cat .bk em { font-style: normal; font-weight: 700; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 22px 0 12px; }
+.toolbar input { flex: 1 1 260px; min-width: 0; font: 15px var(--body); color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; outline: none; }
+.toolbar input:focus { border-color: var(--pink); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: 500 13px var(--body); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.seg button.on { color: #1a0816; background: var(--orange); border-color: var(--orange); font-weight: 700; }
+.items { display: flex; flex-direction: column; gap: 8px; }
+.item { display: grid; grid-template-columns: 110px 1fr 200px; gap: 14px; padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-size: 14px; align-items: start; }
+@media (max-width: 800px) { .item { grid-template-columns: 1fr; gap: 6px; } }
+.item .id { font: 700 12.5px var(--mono); }
+.item .st { display: inline-block; margin-top: 6px; }
+.item .what { overflow-wrap: anywhere; }
+.item .note { font-size: 12.5px; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+.item .who { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.st { font: 700 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; }
+.st.grab { color: var(--pink); background: rgba(255,61,139,.14); }
+.st.claimed { color: var(--wip); background: rgba(255,182,72,.12); }
+.st.pr { color: var(--done); background: rgba(46,230,200,.12); }
+.st.blocked { color: var(--todo); background: rgba(255,77,109,.12); }
+.st.stale { color: var(--research); background: rgba(167,139,250,.14); }
+.more-btn { margin: 14px auto 0; display: block; }
+.review-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.rg { padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+.rg b { font: 700 22px var(--display); }
+.rg span { display: block; font-size: 13px; color: var(--muted); }
+.done-strip { display: flex; flex-wrap: wrap; gap: 6px; }
+.done-strip a { font: 500 12px var(--mono); padding: 4px 9px; border-radius: 99px; background: rgba(46,230,200,.1); color: var(--done); }
+
+/* security reviews */
+.sec-say { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+.sec-say b { color: var(--text); }
+.sec-boxes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 1000px) { .sec-boxes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .sec-boxes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sec-box { text-align: left; font: inherit; color: var(--text); cursor: pointer; padding: 14px 16px; border-radius: 14px; background: var(--card);
+  border: 1px solid var(--line); border-top: 3px solid var(--v); transition: background .15s, border-color .15s; }
+.sec-box:hover { background: var(--card-hi); }
+.sec-box.on { background: var(--card-hi); border-color: var(--v); box-shadow: 0 0 0 1px var(--v) inset; }
+.sec-box.zero { opacity: .55; }
+.sec-box b { display: block; font: 700 30px var(--display); letter-spacing: -.02em; color: var(--v); }
+.sec-box span { font-size: 13px; color: var(--muted); }
+.sec-box:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.sec-note { margin-top: 10px; }
+.sec-tools { margin: 16px 0 12px; padding: 14px; display: grid; gap: 12px; }
+.sec-tools input[type="search"] { width: 100%; min-width: 0; font: 15px var(--body); color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; outline: none; }
+.sec-tools input[type="search"]:focus { border-color: var(--pink); }
+.sec-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.sec-field { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); min-width: 0; }
+.sec-field select { font: 500 13.5px var(--body); color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; max-width: 220px; min-width: 0; color-scheme: dark; }
+.sec-field select option { background: #17122b; color: var(--text); }
+.sec-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.sec-check input { accent-color: var(--orange); margin: 0; }
+.sec-field select:focus-visible, .sec-check:focus-within { outline: 2px solid var(--teal); outline-offset: 1px; }
+.sec-count { text-align: right; font: 500 12px var(--mono); color: var(--dim); margin: 0 0 8px; }
+.sec-cards { display: flex; flex-direction: column; gap: 8px; }
+.sec-group { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 16px 0 4px; }
+.sec-group b { font: 700 16px var(--display); }
+.sec-group .sec-mark { width: 20px; height: 20px; display: inline-grid; place-items: center; border-radius: 50%; font-size: 11px; font-weight: 700; color: var(--v); border: 1px solid var(--v); align-self: center; }
+.sec-group .sec-n { font: 700 12px var(--mono); color: var(--muted); }
+.sec-group .sec-help { font-size: 13px; color: var(--muted); }
+.sec-card { padding: 12px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--v); font-size: 14px; }
+.sec-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.sec-pr { font: 700 13.5px var(--mono); color: var(--v); }
+.sec-title { color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
+.sec-pills { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.sec-pill { font: 700 11px var(--mono); padding: 3px 9px; border-radius: 99px; color: var(--v); background: color-mix(in srgb, var(--v) 14%, transparent); border: 1px solid color-mix(in srgb, var(--v) 40%, transparent); white-space: nowrap; }
+.sec-tag { font: 500 11px var(--mono); padding: 3px 9px; border-radius: 99px; color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.sec-tag.open { color: var(--done); border-color: rgba(46,230,200,.4); }
+.sec-findings { margin: 8px 0 0; padding-left: 20px; color: #e2d9f7; overflow-wrap: anywhere; }
+.sec-findings li { margin: 3px 0; }
+.sec-none { margin: 6px 0 0; color: var(--dim); font-size: 13px; }
+.sec-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.sec-meta code { font: 600 12px var(--mono); }
+.sec-how { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
+.sec-how summary { cursor: pointer; text-decoration: underline dotted; width: fit-content; }
+.sec-how p { margin: 6px 0 0; overflow-wrap: anywhere; }
+
+/* q&a */
+.safety { border-radius: var(--radius); padding: 20px 22px; margin-bottom: 18px; border: 1px solid rgba(255,77,109,.45);
+  background: radial-gradient(500px 220px at 0% 0%, rgba(255,77,109,.18), transparent 60%), var(--card); }
+.safety b { color: #ffd3dc; }
+.safety ul { margin: 10px 0 0; padding-left: 20px; color: #e2d9f7; }
+.safety li { margin: 4px 0; }
+.faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+@media (max-width: 900px) { .faq { grid-template-columns: 1fr; } }
+.faq details { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 0 18px; }
+.faq details[open] { background: var(--card-hi); border-color: rgba(255,154,60,.4); }
+.faq summary { cursor: pointer; list-style: none; padding: 16px 0; font: 700 15.5px/1.35 var(--body); display: flex; gap: 12px; justify-content: space-between; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font: 700 18px var(--mono); color: var(--orange); flex: none; }
+.faq details[open] summary::after { content: "–"; }
+.faq .a { padding: 0 0 16px; color: #d9d0f5; font-size: 14.5px; }
+.faq .a p { margin: 0 0 10px; }
+.faq .a p:last-child { margin-bottom: 0; }
+
+footer { margin-top: 70px; padding: 30px 0 50px; border-top: 1px solid var(--line); color: var(--dim); font-size: 13px; }
+footer .wrap { display: flex; flex-direction: column; gap: 10px; }
+footer details input { font: 13px var(--mono); color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; width: min(360px, 100%); }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 30px); opacity: 0; transition: .3s; background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px; font-weight: 700; z-index: 50; pointer-events: none; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* card mode: a 1200x630 share image of the hero, for screenshots */
+body.card-mode .topbar, body.card-mode main > section:not(.hero), body.card-mode footer, body.card-mode .hero-actions { display: none; }
+body.card-mode { overflow: hidden; }
+body.card-mode .hero { width: 1200px; height: 630px; padding: 54px 0 0; }
+body.card-mode .hero .wrap { max-width: 1200px; padding: 0 56px; }
+body.card-mode .hero-grid { grid-template-columns: 1.2fr .8fr; }
+body.card-mode h1 { font-size: 78px; }
+body.card-mode .ring-box { max-width: 400px; }
+body.card-mode .card-url { display: block; }
+.card-url { display: none; margin-top: 18px; font: 500 14px var(--mono); color: var(--muted); }
+
+/* ---------- banner: rate limits and the token ---------- */
+.banner { border-bottom: 1px solid rgba(255,182,72,.35); background: linear-gradient(90deg, rgba(255,61,139,.12), rgba(255,154,60,.10)); }
+.banner .wrap { padding-top: 18px; padding-bottom: 18px; display: grid; grid-template-columns: 1fr auto; gap: 8px 20px; align-items: start; }
+.banner h3 { margin: 0; font: 700 17px var(--display); }
+.banner p { margin: 6px 0 0; color: #e6dcff; font-size: 14.5px; max-width: 820px; }
+.banner ol { margin: 10px 0 0; padding-left: 22px; font-size: 14.5px; color: #e6dcff; max-width: 820px; }
+.banner li { margin: 4px 0; }
+.banner .token-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.banner input { font: 13px var(--mono); color: var(--text); background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: min(380px, 100%); }
+.banner .fine { font-size: 12.5px; color: var(--muted); }
+.banner.bad { border-bottom-color: rgba(255,77,109,.5); background: rgba(255,77,109,.10); }
+/* "The repository is gone": the first thing on the page, above the sticky top bar, so it scrolls away. */
+.gone { border-bottom: 2px solid rgba(255,77,109,.6); background: radial-gradient(900px 260px at 0% 0%, rgba(255,61,139,.30), transparent 70%), radial-gradient(700px 240px at 100% 100%, rgba(255,154,60,.22), transparent 70%), #1a0b22; }
+.gone .wrap { padding-top: 30px; padding-bottom: 30px; }
+.gone .g-kicker { font: 700 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #ff6b8b; }
+.gone h2 { margin: 8px 0 0; font: 900 clamp(30px, 5.2vw, 54px)/1.05 var(--display); letter-spacing: -.02em; }
+.gone p { margin: 14px 0 0; max-width: 860px; font-size: clamp(15px, 1.6vw, 17.5px); line-height: 1.55; color: #f0e8ff; }
+.gone .g-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.gone .g-actions .btn { font-size: 14px; padding: 9px 18px; }
+body.card-mode .gone { display: none; }
+.hashes { display: grid; gap: 6px; margin: 10px 0; }
+.hashes div { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: baseline; }
+.hashes dt { color: var(--muted); font-size: 13px; }
+.hashes dd { margin: 0; min-width: 0; }
+code.hash { word-break: break-all; font-size: 12.5px; }
+@media (max-width: 640px) { .banner .wrap { grid-template-columns: 1fr; } }
+
+/* ---------- live feed ---------- */
+.live-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .live-grid, .queue-grid { grid-template-columns: 1fr; } }
+.round { position: relative; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: linear-gradient(90deg, rgba(255,61,139,.18), rgba(139,92,246,.14)); border: 1px solid rgba(255,61,139,.4); }
+.round.now::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 22px 2px rgba(255,61,139,.35); opacity: 0; animation: glow 1.6s ease-in-out infinite alternate; }
+.round b { font: 700 16px var(--display); }
+.round .meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.round .faces { display: flex; margin-top: 10px; flex-wrap: wrap; }
+.round .faces img { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--bg2); margin-right: -6px; background: var(--card-hi); }
+@keyframes glow { to { opacity: 1; } }
+.evs { display: flex; flex-direction: column; gap: 2px; max-height: 560px; overflow: auto; }
+.ev { display: grid; grid-template-columns: 26px 28px 1fr auto; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; color: var(--text); font-size: 13.5px; }
+.ev:hover { background: var(--card-hi); text-decoration: none; }
+.ev .ic { text-align: center; font-size: 15px; }
+.ev img, .ev .noav { width: 28px; height: 28px; border-radius: 50%; background: var(--card-hi); }
+.ev .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev .t b { font: 700 12.5px var(--mono); }
+.ev .t .u { color: var(--muted); }
+.ev .when { font: 500 11.5px var(--mono); color: var(--dim); }
+.ev.merged b { color: var(--done); }
+.ev.opened b { color: var(--sun); }
+.ev.closed b, .ev.revert b { color: var(--todo); }
+.ev.claim b, .ev.status b { color: var(--research); }
+.ev.new { animation: slidein .6s ease-out; background: rgba(46,230,200,.08); }
+@keyframes slidein { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat b { display: block; font: 700 26px var(--display); letter-spacing: -.02em; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+.rounds { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; font-size: 13.5px; }
+.rounds div { display: flex; justify-content: space-between; gap: 10px; }
+.rounds .when { font: 500 12px var(--mono); color: var(--dim); white-space: nowrap; }
+
+/* ---------- merge queue ---------- */
+.tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tiles .stat.ok b { color: var(--done); }
+.tiles .stat.bad b { color: var(--todo); }
+.tiles .stat.wait b { color: var(--wip); }
+.queue-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.prs { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.prs a { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; padding: 6px 8px; border-radius: 8px; color: var(--text); font-size: 13.5px; }
+.prs a:hover { background: var(--card-hi); text-decoration: none; }
+.prs .n { font: 700 12.5px var(--mono); color: var(--muted); }
+.prs .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prs .when { font: 500 11.5px var(--mono); color: var(--dim); }
+.authors { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 13.5px; }
+.authors .who { font-weight: 700; }
+.chain { font: 500 13px var(--mono); margin: 4px 0; }
+.list-more { display: block; margin: 6px 8px 2px; font-size: 13px; }
+
+/* ---------- triage (triage.js) ---------- */
+#triageBody .card { contain: content; }
+.tcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.sdot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; vertical-align: 0; }
+.tag { font: 700 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--research); border: 1px solid currentColor; border-radius: 6px; padding: 0 5px; margin-left: 4px; }
+.dup { padding: 8px 0; border-top: 1px solid var(--line); }
+.subhead + .dup { border-top: 0; padding-top: 2px; }
+.dup-head { font-size: 13.5px; padding: 0 8px; }
+.dup-head span { color: var(--muted); }
+.dup .prs { margin-top: 2px; }
+.hot { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(60px, 1fr) auto; gap: 12px; align-items: center; padding: 5px 0; font-size: 13px; }
+.hot code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hot .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.06); overflow: hidden; }
+.hot .bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--pink), var(--orange)); }
+.hot .num { font: 700 13px var(--mono); white-space: nowrap; }
+.hot .num small { font-weight: 500; color: var(--dim); }
+
+/* ---------- status bar: requests, limits, what is still loading ---------- */
+/* Inside the sticky top bar, so the two always stay together whatever height the bar wraps to. One line: the
+   status left, the short rate summary right (the full one is its tooltip). */
+.netbar { background: rgb(19,12,44); border-top: 1px solid var(--line); font-size: 12.5px; }
+.netbar .wrap { display: flex; align-items: center; gap: 4px 18px; justify-content: space-between; padding-top: 5px; padding-bottom: 5px; }
+.nb-status { min-width: 0; display: flex; align-items: center; gap: 2px 12px; }
+.nb-msg { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }   /* two lines at most */
+.nb-offer { flex-shrink: 0; white-space: nowrap; }
+.nb-rates { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 760px) {
+  .netbar .wrap { flex-direction: column; align-items: stretch; gap: 1px; }
+  .nb-status { flex-wrap: wrap; }
+  .nb-msg { flex: 1 1 16em; }
+  .nb-rates { overflow: hidden; text-overflow: ellipsis; }
+}
+.nb-status .ok { color: var(--done); }
+.nb-status .busy { color: var(--sun); }
+.nb-status .wait { color: var(--wip); }
+.nb-status b, .nb-rates b { color: var(--text); font-family: var(--mono); }
+.nb-rates { color: var(--dim); font-size: 12px; }
+.nb-rates .low { color: var(--wip); }
+.linkbtn { font: inherit; color: var(--teal); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+.pending { position: relative; }
+.pending .skeleton { height: 120px; }
+.pending-box { margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+.pending-title { display: block; color: var(--text); font-weight: 700; }
+.pending-msg { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); }
+.pending-msg:empty { display: none; }
+/* Waiting for a limit with nothing to show yet: a warning box, so it reads as "working", not "broken". */
+.pending.warn .skeleton, .pending.bad .skeleton { display: none; }
+.pending.warn .pending-box, .pending.bad .pending-box { margin: 0; padding: 18px 20px; border-radius: 14px; border: 1px solid rgba(255,182,72,.45); background: rgba(255,182,72,.09); }
+.pending.warn .pending-title { color: var(--wip); font: 700 16px var(--display); }
+.pending.warn .pending-msg { color: #f1e6c8; }
+.pending.bad .pending-box { border-color: rgba(255,77,109,.5); background: rgba(255,77,109,.08); }
+.pending.bad .pending-title { color: #ffc2cf; }
+.pending .pb-token { margin-top: 8px; }
+
+/* ---------- PR pipeline (pipeline.js) ---------- */
+.pipe-card { position: relative; margin-bottom: 16px; padding: 16px 16px 10px; }
+.pipe-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.pipe-legend .lg { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--wip); }
+.pipe-legend .lg.lg-check { box-shadow: 0 0 0 2px var(--research); }
+.pipe-legend .lg.talk { background: radial-gradient(circle, #fff 0 1.6px, var(--wip) 2px); }
+.pipe-legend .lg.old { background: linear-gradient(135deg, var(--wip), transparent); }
+.pipe-legend .lg.lg-ciok { position: relative; background: var(--pink); }
+.pipe-legend .lg.lg-ciok::after, .pdot.ciok::after { content: ""; position: absolute; right: -2px; bottom: -2px; width: 6px; height: 6px; border-radius: 2px; background: var(--done); box-shadow: 0 0 0 1.5px #0d0820; }
+.pipe-scroll { position: relative; overflow-x: auto; overflow-y: hidden; }
+.pipe { position: relative; min-height: 180px; }
+.pipe-empty { padding: 60px 0; text-align: center; color: var(--muted); }
+.pcol { position: absolute; top: 0; bottom: 0; border-radius: 12px; background: rgba(255,255,255,.025); padding: 8px 8px 0; display: flex; flex-direction: column; }
+.pcol b { font: 700 20px var(--display); color: var(--c); line-height: 1.1; }
+.pcol .nm { font: 700 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcol .hint { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcol.work { background: rgba(255,77,109,.05); }
+.pcol.band { background: none; border: 1px dashed rgba(255,77,109,.28); padding: 0; top: -2px; bottom: -2px; }
+.pcol.band span { position: absolute; bottom: 4px; left: 8px; font: 700 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,77,109,.7); }
+.pmain { position: absolute; top: 0; bottom: 0; border-radius: 12px; padding: 8px 8px 0; background: linear-gradient(180deg, rgba(255,61,139,.14), rgba(255,154,60,.10)); }
+.pmain b { font: 800 15px var(--display); background: linear-gradient(90deg, var(--pink), var(--orange)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pmain .hint { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
+.pmain i { position: absolute; left: 50%; top: 58px; bottom: 10px; width: 4px; margin-left: -2px; border-radius: 4px; background: linear-gradient(180deg, var(--pink), var(--orange)); box-shadow: 0 0 12px rgba(255,61,139,.6); }
+.pmain.flash i { animation: mainflash .7s ease-out; }
+@keyframes mainflash { 0% { box-shadow: 0 0 34px 6px rgba(255,61,139,.95); width: 8px; margin-left: -4px; } 100% { box-shadow: 0 0 12px rgba(255,61,139,.6); } }
+.pdot { position: absolute; left: 0; top: 0; width: 10px; height: 10px; border-radius: 3px; background: var(--c); opacity: .9;
+  transition: transform 1.1s cubic-bezier(.2,.8,.2,1), background-color .6s, opacity .6s, box-shadow .4s; }
+.pdot.checked { box-shadow: 0 0 0 2px var(--research); }
+.pdot.talk { background: radial-gradient(circle, #fff 0 1.6px, var(--c) 2px); }
+.pdot:hover, .pdot:focus-visible { opacity: 1; outline: 2px solid #fff; outline-offset: 1px; z-index: 3; }
+.pipe.instant .pdot { transition: none; }
+.pdot.born { animation: born .9s ease-out; }
+@keyframes born { from { opacity: 0; scale: 2.6; } }
+.pdot.ping { animation: ping 1.2s ease-out 2; z-index: 2; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 var(--c); } 100% { box-shadow: 0 0 0 9px transparent; } }
+/* A dot whose stage didn't change: a new layout repacks it without sliding (only real changes move). */
+.pdot.still { transition: background-color .6s, opacity .6s, box-shadow .4s; }
+.pdot.merging { transition: transform 1.3s cubic-bezier(.5,0,.3,1), opacity 1.3s ease-in; opacity: 0; z-index: 4; box-shadow: 0 0 14px 3px var(--c); }
+.pdot.leaving { opacity: 0; transition: opacity 1.2s; }
+.pdot.mdot { opacity: calc(1 - var(--age, 0) * .55); }
+.pcol.done { background: rgba(192,132,252,.06); }
+.pround { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); text-align: center; pointer-events: none; padding: 14px 26px; border-radius: 18px;
+  background: rgba(10,7,24,.82); border: 1px solid rgba(255,61,139,.5); box-shadow: 0 0 40px rgba(255,61,139,.35); }
+.pround span { display: block; font: 700 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--orange); }
+.pround b { display: block; font: 900 44px/1.1 var(--display); }
+.ptip { position: absolute; left: 0; top: 0; z-index: 10; max-width: 340px; pointer-events: none; padding: 10px 12px; border-radius: 12px;
+  background: #1b1338; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(0,0,0,.5); font-size: 13px; }
+.ptip .m { color: var(--muted); font-size: 12px; margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) { .pdot, .pdot.merging { transition: opacity .3s; } }
+/* Narrow screens (pipeline.js switches below the width the columns need): one row per stage, main as a lane across. */
+.pipe.rows .pcol { flex-direction: row; align-items: baseline; gap: 8px; padding: 4px 10px 0; }
+.pipe.rows .pcol b { font-size: 15px; }
+.pipe.rows .pcol .hint { min-width: 0; }
+.pipe.rows .pcol.work { padding-right: 92px; }
+.pipe.rows .pcol.band { padding: 0; }
+.pipe.rows .pcol.band span { top: 8px; bottom: auto; left: auto; right: 10px; }
+.pipe.rows .pmain { display: flex; align-items: baseline; gap: 8px; padding: 6px 10px 0; }
+.pipe.rows .pmain .hint { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pipe.rows .pmain i { left: 10px; right: 10px; top: auto; bottom: 8px; width: auto; height: 4px; margin-left: 0; }
+.pipe.rows .pmain.flash i { animation-name: mainflash-x; }
+@keyframes mainflash-x { 0% { box-shadow: 0 0 34px 6px rgba(255,61,139,.95); height: 8px; bottom: 6px; } 100% { box-shadow: 0 0 12px rgba(255,61,139,.6); } }
+
+/* ---------- flow (live) and queue composition ---------- */
+.flow { display: grid; grid-template-columns: 70px 1fr 44px; gap: 8px 10px; align-items: center; font-size: 13px; margin-top: 6px; }
+.flow .bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; display: flex; }
+.flow .bar i { display: block; height: 100%; transition: width 1s ease-out; }
+.flow .v { font: 700 13px var(--mono); text-align: right; }
+.net { margin-top: 12px; font-size: 14px; }
+.net b { font: 700 20px var(--display); }
+.net .up { color: var(--todo); }
+.net .down { color: var(--done); }
+.callout.comp { margin: 0 0 16px; }
+.callout { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(255,182,72,.08); border: 1px solid rgba(255,182,72,.3); font-size: 14px; }
+.callout b { color: var(--wip); }
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+/* ---------- per-project sections (project.js) ---------- */
+.muted { color: var(--muted); font-weight: 400; }
+.pfacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 22px; }
+.pf span { display: block; font: 700 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.pf b { font-weight: 600; }
+.iss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.iss-col h3 { margin: 0 0 10px; font-size: 16px; }
+.iss, .rel-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
+.iss li span, .rel-list li span { display: block; font-size: 12px; }
+.rel-list li span { display: inline; }
+.rel-list { margin: 12px 0; }
+[data-feature-off] { display: none !important; }
+/* ---------- the shared ladder under the ring (race.js) ---------- */
+.race { position: relative; z-index: 1; margin-top: 36px; }
+.race .ladder-host { background: rgba(10,7,24,.72); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px 10px; }
+.ladder-note { color: var(--muted); font-size: 14px; margin: 10px 2px 0; }
+.topbar .switch { margin-left: 4px; }
+</style>
 </head>
 <body>
-<header class="topbar"><div class="wrap"><a class="brand" href="../">Road to Playable</a><label class="switch"><span>Project</span><select id="switcher" aria-label="Pick a project"><option value="../">Standings: every project</option><optgroup label="World loads"><option value="../anyxboxx/">AnyXboxX</option><option value="../victory/">Victory</option></optgroup><optgroup label="Menus"><option value="../palmwave/">Palmwave</option><option value="../five-star-recomp/">Five Star Recomp</option><option value="../openscarlett-ce/">OpenScarlett (Community Edition)</option><option value="../xcl/">XCL</option><option value="../xbox2windows/" selected>Xbox2Windows</option><option value="../tuxbox/">TuxBox</option><option value="../boottest/">BootTest</option></optgroup><optgroup label="First frame"><option value="../openscarlett/">OpenScarlett</option><option value="../holy-interoperability/">Holy Interoperability</option></optgroup><optgroup label="Graphics device"><option value="../leonida/">Leonida</option></optgroup><optgroup label="Groundwork"><option value="../kajcsi-recomp/">Kajcsi Recomp</option><option value="../percyscarlett/">PercyScarlett</option><option value="../xbox-emulator/">Xbox Emulator</option><option value="../anyps5/">AnyPS5</option><option value="../scarlett-layer/">scarlett-layer</option><option value="../scarlettx/">ScarlettX</option><option value="../xvalkyrie/">XValkyrie</option></optgroup></select></label><span class="checked">Standings checked 2026-11-24</span></div></header>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../" title="All projects">Xbox2Windows</a>
+    <label class="switch"><span>Project</span><select id="switcher" aria-label="Pick a project"><option value="../">Standings: every project</option></select></label>
+    <nav class="nav">
+      <a href="#live">Live</a>
+      <a href="#journey">Road to playable</a>
+      <a href="#blockers">Blockers</a>
+      <a href="#graphics">Graphics layer</a>
+      <a href="#pulse">Activity</a>
+      <a href="#queue">Merge queue</a>
+      <a href="#triage">Triage</a>
+      <a href="#security">Security</a>
+      <a href="#work">Work board</a>
+      <a href="#faq">Q&amp;A</a>
+    </nav>
+    <div class="live" aria-live="polite">
+      <span class="dot" id="liveDot"></span>
+      <span class="txt" id="liveTxt">Connecting to GitHub…</span>
+      <button class="btn" id="refreshBtn" type="button" title="Refresh now">↻</button>
+    </div>
+  </div>
+  <div class="netbar" id="netbar" aria-live="polite"><div class="wrap"><div class="nb-status"><span class="nb-msg"><span class="busy">↻ Loading from GitHub…</span></span></div></div></div>
+</header>
+<div class="banner" id="banner" role="status" hidden></div>
+
 <main>
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <div class="eyebrow">Recompiler · <span class="badge active">Active</span></div>
-        <h1 class="pname">Xbox2Windows</h1>
-        <p class="repo-line"><a href="https://github.com/R0Y00/Xbox2Windows" target="_blank" rel="noopener">R0Y00/Xbox2Windows ↗</a></p>
-        <p class="tagline">A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified.</p>
-        
-        <div class="chips" id="chips">
-          <div class="chip"><b>#7 of 14</b><span>In the standings</span></div>
-          <div class="chip"><b id="c-stars">…</b><span>Stars</span></div>
-          <div class="chip"><b id="c-pushed">…</b><span>Last push</span></div>
+        <div class="eyebrow">Live community dashboard</div>
+        <h1>Road to<br><span class="grad">Playable</span></h1>
+        <p class="tagline" id="tagline">An Xbox Series game, rebuilt to run natively on Windows, built on your own PC from your own copy.</p>
+        <div class="headline" id="headline">Loading the latest status…</div>
+        <div class="chips" id="chips"></div>
+        <div class="hero-actions">
+          <button class="btn primary" id="copyBtn" type="button">Copy summary for a post</button>
+          <a class="btn" id="cardLink" href="?card=1" target="_blank" rel="noopener">Open share card</a>
+          <a class="btn" id="repoLink" href="#" target="_blank" rel="noopener">GitHub ↗</a>
         </div>
+        <div class="card-url" id="cardUrl"></div>
       </div>
       <div class="ring-col">
-        <div class="ring-box">
-          <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
-            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+      <div class="ring-box">
+        <div class="sun"></div>
+        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#ffd166"/><stop offset=".45" stop-color="#ff9a3c"/><stop offset="1" stop-color="#ff3d8b"/>
-            </linearGradient></defs>
-            <circle class="track" cx="100" cy="100" r="86"/>
-            <circle class="bar" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="250.72"/>
-          </svg>
-          <div class="ring-center">
-            <div class="pct">53.6<small>%</small></div>
-            <div class="lbl">Stage 5 of 8</div>
-            <div class="sub">Menus</div>
-          </div>
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="100" cy="100" r="86"/>
+          <circle class="bar" id="ringBar" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="540.35"/>
+        </svg>
+        <div class="ring-center">
+          <div class="pct"><span id="pct">0</span><small>%</small></div>
+          <div class="lbl">to playable</div>
+          <div class="sub" id="ringSub">weighted milestone score</div>
         </div>
-        <p class="ring-note">The game&#x27;s own screens are drawn: first-boot screens, menus or the intro video.</p>
+      </div>
+      <p class="ring-note">A rough gauge, not a countdown. It counts milestones, not the work inside them, so when a stage
+        turns out bigger than expected the number can stall for a long time or even drop. <a href="#journey">How it's worked out</a></p>
+      <div class="forks" id="forks"></div>
       </div>
     </div>
-    <div class="wrap"><div id="ladder" class="ladder-host" aria-label="This project on the milestone ladder, among the others"></div></div>
-  </section>
-
-  <section id="status">
-    <div class="wrap two">
-      <div class="card">
-        <h2>Where it stands</h2>
-        <p>A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified.</p>
-        <dl class="facts"><div><dt>Evidence</dt><dd>README startup note, RTX 4060 Laptop (plus an RX 9070 XT report)</dd></div><div><dt>Caveat</dt><dd>needs a patched diagnostic executable that continues past assertions; title not named</dd></div><div><dt>Tested on</dt><dd>RTX 4060 Laptop</dd></div><div><dt>Graphics</dt><dd>D3D12</dd></div><div><dt>Shaders</dt><dd>RDNA2 (gfx1013) to DXIL</dd></div><div><dt>Language</dt><dd>C++, Python</dd></div></dl>
-        <p class="note">Read by hand from the project's own sources on 2026-11-24; not run or verified by this page.</p>
-      </div>
-      <div class="card">
-        <h2>The approach</h2>
-        <p><b>Recompiler.</b> Translates the console executable, or the parts of it that differ, into a new PC program ahead of time.</p>
-        <div id="repo-facts" class="repo-facts"><span class="busy">Loading from GitHub…</span></div>
-      </div>
+    <div class="wrap race">
+      <div id="ladder" class="ladder-host" aria-label="This project on the shared milestone ladder, among the others"></div>
+      <p class="ladder-note" id="ladderNote"></p>
     </div>
   </section>
 
-  
-
-  <section id="activity">
+  <section id="live">
     <div class="wrap">
-      <h2>Activity</h2>
-      <p class="lede">Commits on the default branch over the last 14 days, live from GitHub.</p>
-      <div class="card"><div id="bars" class="bars"><span class="busy">Loading…</span></div></div>
-      <div class="two">
-        <div class="card"><h3>Latest commits</h3><ol id="commits" class="feed"><li class="busy">Loading…</li></ol></div>
-        <div class="card"><h3>Open pull requests</h3><ol id="pulls" class="feed"><li class="busy">Loading…</li></ol></div>
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Right now</div>
+          <h2>Live</h2>
+          <p class="lede">Every open pull request is one dot, in the column of the stage it is at. When CI finishes or someone checks a PR, its dot moves; when it is merged, it flies into main and lands in the Merged column behind it. Hover a dot for the PR, click to open it. Updates every minute while this tab is open.</p>
+        </div>
       </div>
+      <div class="card pipe-card">
+        <div class="pipe-legend" aria-hidden="true">
+          <span><i class="lg lg-check"></i>checked by someone else</span>
+          <span><i class="lg talk"></i>has comments</span>
+          <span><i class="lg lg-ciok"></i>CI passed, but held up in this column</span>
+          <span><i class="lg old"></i>oldest first, top left</span>
+        </div>
+        <div class="pipe-scroll">
+          <div class="pipe" id="pipe" role="group" aria-label="Open pull requests by stage"></div>
+          <div class="pround" id="pipeRound" hidden></div>
+        </div>
+        <div class="ptip" id="pipeTip" role="tooltip" hidden></div>
+      </div>
+      <div id="liveBody"><div class="pending" data-part="feed"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
     </div>
   </section>
 
-  <section id="people">
+  <section id="journey">
     <div class="wrap">
-      <h2>Contributors</h2>
-      <div id="people-list" class="people"><span class="busy">Loading…</span></div>
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Part 1 · For everyone</div>
+          <h2>The road to playable</h2>
+          
+          <p class="lede" data-only="generic">The shared ladder, from groundwork to playable. The stage is read by hand from Xbox2Windows's own README, status notes and commits on 2026-11-24; everything else on this page is live.</p>
+        </div>
+      </div>
+      <div id="journeyBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="blockers">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">What's in the way</div>
+          <h2>Blockers &amp; bottlenecks</h2>
+          
+          <p class="lede" data-only="generic">Where Xbox2Windows stops today, by its own account, and the next stage on the ladder.</p>
+        </div>
+      </div>
+      <div id="blockersBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="graphics">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">The hardest part</div>
+          <h2>The graphics layer</h2>
+          
+          <p class="lede" data-only="generic">The game talks to the Xbox version of DirectX 12 and ships GPU programs compiled for the console's graphics chip. How Xbox2Windows gets them onto a PC graphics card.</p>
+        </div>
+      </div>
+      <div id="graphicsBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="proof">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Proof, not promises</div>
+          <h2>How sure are we?</h2>
+          
+          <p class="lede" data-only="generic">What backs Xbox2Windows's place on the ladder: where the claim comes from, on which machine, and what it leaves out.</p>
+        </div>
+      </div>
+      <div id="proofBody"><div class="pending"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading the project's documents…</b><p class="pending-msg"></p></div></div></div>
+    </div>
+  </section>
+
+  <section id="hardware">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">For players</div>
+          <h2>Can my PC run it?</h2>
+          <p class="lede">Pick your CPU, graphics card and memory and see where they sit against the consoles and the community's 1080p Low estimate. It's a guess from benchmarks until the port can start the game; where the project has really tested your graphics card, it says so.</p>
+        </div>
+      </div>
+      <div id="hardwareBody"><div class="pending"><div class="skeleton"></div></div></div>
+    </div>
+  </section>
+
+  <section id="pulse">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Last 24 hours</div>
+          <h2>Activity</h2>
+          <p class="lede">The pace of the community: pull requests merged, commits on <code id="branchName">main</code> and the people behind them.</p>
+        </div>
+      </div>
+      <div id="pulseBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="queue">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">For maintainers</div>
+          <h2>Merge queue</h2>
+          <p class="lede">What the next merge round could take: open pull requests by CI result, the ones that need a rebase and the ones that have to go in order.</p>
+        </div>
+      </div>
+      <div id="queueBody"><div class="pending" data-part="pipeline"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="triage">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">For maintainers</div>
+          <h2>Triage</h2>
+          <p class="lede">What to merge together and what to close: green PRs that can go in one round without making each other conflict, items that more than one author has a PR for, and the files most PRs fight over.</p>
+        </div>
+      </div>
+      <div id="triageBody"><div class="pending" data-part="pipeline"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="security">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Before merging</div>
+          <h2 data-only="generic">Before you run it</h2>
+          
+          <p class="lede" data-only="generic">Before you run anything from Xbox2Windows: what it publishes as downloads, and where to take them from.</p>
+        </div>
+        
+        <a class="btn" data-only="generic" href="https://github.com/R0Y00/Xbox2Windows/releases" target="_blank" rel="noopener">Releases ↗</a>
+      </div>
+      <div id="securityBody"><div class="pending"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading the review table…</b><p class="pending-msg"></p></div></div></div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Part 2 · For contributors</div>
+          <h2>Work board</h2>
+          
+          <p class="lede" data-only="generic">The open issues of Xbox2Windows, grouped by label, most recently active first: where the project asks for help, and what people report.</p>
+        </div>
+        <a class="btn" id="claimLink" href="#" target="_blank" rel="noopener"><span data-only="generic">Issues ↗</span></a>
+      </div>
+      <div id="workBody"><div class="pending" data-part="status"><div class="skeleton"></div><div class="pending-box"><b class="pending-title">Loading from GitHub…</b><p class="pending-msg"></p><button class="linkbtn pb-token" type="button" hidden>Load faster with a free token</button></div></div></div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Part 3 · Questions from non-developers</div>
+          <h2>Q&amp;A</h2>
+          <p class="lede">Plain answers to what people ask most, and how not to get hacked while waiting.</p>
+        </div>
+      </div>
+      <div class="safety">
+        <b>Stay safe: the short version</b>
+        <ul>
+          <li>The game is <b>not playable yet</b> on any PC project. Anything offered as a "playable build", "pre-patched exe" or "one-click installer" is fake and most likely malware.</li>
+          <li>Xbox2Windows is source code on GitHub, nothing else. A real project contains no game files and never asks you to download any.</li>
+          <li>Never turn off your antivirus, run a stranger's script, or type a password or a payment detail because a download page tells you to.</li>
+        </ul>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>What is Xbox2Windows, in one sentence?</summary>
+          <div class="a">
+            
+            <p data-only="generic">Recompiler: Translates the console executable, or the parts of it that differ, into a new PC program ahead of time. <a href="https://github.com/R0Y00/Xbox2Windows" target="_blank" rel="noopener">Its repository</a> is the source; this page only reads it.</p>
+          </div>
+        </details>
+        <details>
+          <summary>How far is it right now?</summary>
+          <div class="a">
+            <p data-only="generic">Stage 5 of 8 on the shared ladder: <b>Menus</b>. A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified.</p>
+            <p data-only="generic">Source: README startup note, RTX 4060 Laptop (plus an RX 9070 XT report). Read by hand on 2026-11-24; projects move fast, so check its commits for anything newer. <a href="../">How it compares with the others</a>.</p>
+            
+          </div>
+        </details>
+        <details>
+          <summary>Where do I download the game files?</summary>
+          <div class="a">
+            <p>Not here, and not from any of these projects. They work only with a copy you already have, and this page won't point you to any source.</p>
+            <p>If someone sends you a link in a DM or a comment, treat it as a trap. Fake download sites are the oldest trick around a big release.</p>
+          </div>
+        </details>
+        
+        <details>
+          <summary>How do I check that my game_scarlett_master.exe is the right one?</summary>
+          <div class="a">
+            <p>The projects are built and tested against one executable. Compare your copy with it before you use it: if any value differs, it is another build or a changed file, so don't run it.</p>
+            <dl class="hashes">
+              <div><dt>Size</dt><dd>120,181,760 bytes</dd></div>
+              <div><dt>SHA-1</dt><dd><code class="hash">2be54b5e91275a2a8a0ba65b74eab51527933522</code></dd></div>
+              <div><dt>SHA-256</dt><dd><code class="hash">e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993</code></dd></div>
+            </dl>
+            <p>Several contributors checked the SHA-256 independently, and Leonida's docs and its <code>tools/exe_sha.py</code> use it. The SHA-1 is from the same file.</p>
+            <p>On Windows, in PowerShell: <code>Get-FileHash game_scarlett_master.exe -Algorithm SHA1</code> (or <code>-Algorithm SHA256</code>).</p>
+            <p>A matching hash only tells you the file is the one others tested. It doesn't make the place you got it from safe.</p>
+          </div>
+        </details>
+        <details>
+          <summary>How long until it's playable?</summary>
+          <div class="a">
+            
+            
+            <p data-only="generic">Nobody knows. Every project works the same loop: start the game, see where it stops, build the missing piece, start again. The jumps between stages are uneven: a project can go from the first frame to the menus in hours and then spend weeks on the world.</p>
+            <p data-only="generic">Playable on this ladder means 30 minutes in the game without a crash at 20 frames a second or better. Speed is usually the last and longest part.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What does the percentage at the top mean?</summary>
+          <div class="a">
+            
+            <p data-only="generic">Where the project's stage sits on the shared ladder, from 0% (groundwork) to 100% (playable), with a little extra for how far it is into its stage compared with the others there. It counts milestones, not hours of work, so it can sit still for a long time.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Someone shared a "playable" download. Is it legit?</summary>
+          <div class="a">
+            <p>Check <a href="../">the standings</a>. As long as no project is at "Playable", a playable download can't exist, so it is fake.</p>
+            <p>Even later, a virus scan alone isn't enough: someone who wants to hack people can build something that scans clean. Trust nothing you haven't built yourself from a project's own GitHub page, and don't blindly trust anyone who vouches for a file.</p>
+          </div>
+        </details>
+        
+        
+        <details>
+          <summary>Can I help without writing code?</summary>
+          <div class="a">
+            
+            
+            <p data-only="generic">Often, yes: test runs on graphics cards the authors don't have, and clear bug reports with the exact build you ran. The work board above lists the open issues; read the project's README for how it wants reports.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Is this page official?</summary>
+          <div class="a"><p>No. It's an unofficial community dashboard that reads Xbox2Windows's public GitHub pages live in your browser. When it and GitHub disagree, GitHub is right.</p></div>
+        </details>
+      </div>
     </div>
   </section>
 </main>
-<footer class="foot"><div class="wrap">Road to Playable · an independent community tracker, not affiliated with this
-  project or with the game's makers · <a href="../">all projects</a> ·
-  <a href="https://github.com/CLHelper/port-dashboards" target="_blank" rel="noopener">source</a></div></footer>
 
-<script type="application/json" id="data">{"ladder":[{"key":"groundwork","label":"Groundwork","pct":0,"means":"Tools, formats and loaders; the game's own executable has not been run yet."},{"key":"exe","label":"Executable runs","pct":15,"means":"The game's code starts: its entry point runs and its imports are answered."},{"key":"device","label":"Graphics device","pct":25,"means":"It creates its graphics device, queues and command lists, but nothing reaches the screen."},{"key":"frame","label":"First frame","pct":35,"means":"Frames reach the screen, even blank or garbled ones."},{"key":"menus","label":"Menus","pct":50,"means":"The game's own screens are drawn: first-boot screens, menus or the intro video."},{"key":"world","label":"World loads","pct":62,"means":"It loads into the game world, though the picture may still be dark or incomplete."},{"key":"ingame","label":"In-game","pct":78,"means":"Player control in the world, with a recognisable picture."},{"key":"playable","label":"Playable","pct":100,"means":"In-game for 30 minutes or more without a crash, at 20 frames a second or better."}],"project":{"repo":"R0Y00/Xbox2Windows","slug":"xbox2windows","name":"Xbox2Windows","kind":"recompiler","base":null,"stage":"menus","status":"active"},"base":null,"markers":[{"name":"AnyXboxX","score":70.8,"avatar":"https://avatars.githubusercontent.com/u/106304476?v=4&s=80","href":"../anyxboxx/","slug":"anyxboxx"},{"name":"Victory","score":70.0,"avatar":"https://avatars.githubusercontent.com/u/60314886?v=4&s=80","href":"../victory/","slug":"victory"},{"name":"Palmwave","score":59.6,"avatar":"https://avatars.githubusercontent.com/u/226836004?v=4&s=80","href":"../palmwave/","slug":"palmwave"},{"name":"Five Star Recomp","score":58.4,"avatar":"https://avatars.githubusercontent.com/u/254948405?v=4&s=80","href":"../five-star-recomp/","slug":"five-star-recomp"},{"name":"OpenScarlett (Community Edition)","score":57.2,"avatar":"https://avatars.githubusercontent.com/u/337893026?v=4&s=80","href":"../openscarlett-ce/","slug":"openscarlett-ce"},{"name":"XCL","score":54.8,"avatar":"https://avatars.githubusercontent.com/u/32580210?v=4&s=80","href":"../xcl/","slug":"xcl"},{"name":"Xbox2Windows","score":53.6,"avatar":"https://avatars.githubusercontent.com/u/128987794?v=4&s=80","href":"../xbox2windows/","slug":"xbox2windows"},{"name":"TuxBox","score":52.4,"avatar":"https://avatars.githubusercontent.com/u/1431358?v=4&s=80","href":"../tuxbox/","slug":"tuxbox"},{"name":"BootTest","score":51.2,"avatar":"https://avatars.githubusercontent.com/u/193108222?v=4&s=80","href":"../boottest/","slug":"boottest"},{"name":"OpenScarlett","score":42.5,"avatar":"https://avatars.githubusercontent.com/u/160736368?v=4&s=80","href":"../openscarlett/","slug":"openscarlett"},{"name":"Holy Interoperability","score":39.5,"avatar":"https://avatars.githubusercontent.com/u/115415388?v=4&s=80","href":"../holy-interoperability/","slug":"holy-interoperability"},{"name":"Leonida","score":30.0,"avatar":"https://avatars.githubusercontent.com/u/283527159?v=4&s=80","href":"../leonida/","slug":"leonida"},{"name":"Kajcsi Recomp","score":4.5,"avatar":"https://avatars.githubusercontent.com/u/64730213?v=4&s=80","href":"../kajcsi-recomp/","slug":"kajcsi-recomp"},{"name":"PercyScarlett","score":3.0,"avatar":"https://avatars.githubusercontent.com/u/108372609?v=4&s=80","href":"../percyscarlett/","slug":"percyscarlett"}],"highlight":"xbox2windows","self":{"name":"Xbox2Windows","score":53.6,"avatar":"https://avatars.githubusercontent.com/u/128987794?v=4&s=80","href":"./","slug":"xbox2windows"}}</script>
-<script src="../assets/scrub.js"></script><script src="../assets/ladder.js"></script><script src="../assets/switcher.js"></script><script src="../assets/project.js"></script>
+<footer>
+  <div class="wrap">
+    <div>Unofficial community dashboard, part of <a href="../">Road to Playable</a>. Everything on this page is read live from public GitHub data in your browser. It contains no game data and no files from the game.</div>
+    <div id="rateTxt"></div>
+    <details>
+      <summary>Your GitHub token</summary>
+      <p>Without a token GitHub allows 60 requests an hour per network. A token with no scopes raises that to 5,000. It is stored only in this browser's local storage and sent only to api.github.com.</p>
+      <input id="tokenInput" type="password" placeholder="github_pat_…" autocomplete="off">
+      <button class="btn" id="tokenSave" type="button">Save</button>
+      <button class="btn" id="tokenClear" type="button">Remove</button>
+    </details>
+  </div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script type="application/json" id="project-config">{"slug":"xbox2windows","name":"Xbox2Windows","repo":"R0Y00/Xbox2Windows","branch":"main","features":[],"ladder":[{"key":"groundwork","label":"Groundwork","pct":0,"means":"Tools, formats and loaders; the game's own executable has not been run yet."},{"key":"exe","label":"Executable runs","pct":15,"means":"The game's code starts: its entry point runs and its imports are answered."},{"key":"device","label":"Graphics device","pct":25,"means":"It creates its graphics device, queues and command lists, but nothing reaches the screen."},{"key":"frame","label":"First frame","pct":35,"means":"Frames reach the screen, even blank or garbled ones."},{"key":"menus","label":"Menus","pct":50,"means":"The game's own screens are drawn: first-boot screens, menus or the intro video."},{"key":"world","label":"World loads","pct":62,"means":"It loads into the game world, though the picture may still be dark or incomplete."},{"key":"ingame","label":"In-game","pct":78,"means":"Player control in the world, with a recognisable picture."},{"key":"playable","label":"Playable","pct":100,"means":"In-game for 30 minutes or more without a crash, at 20 frames a second or better."}],"stage":"menus","stageN":5,"stageLabel":"Menus","within":0.3,"score":53.6,"summary":"A modified diagnostic build of the executable played the intro, showed readable setup text and reached loading. Startup of the unmodified executable, menu navigation and gameplay are not verified.","evidence":"README startup note, RTX 4060 Laptop (plus an RX 9070 XT report)","caveat":"needs a patched diagnostic executable that continues past assertions; title not named","tested_on":"RTX 4060 Laptop","backend":"D3D12","shader_path":"RDNA2 (gfx1013) to DXIL","language":"C++, Python","kindLabel":"Recompiler","status":"active","statusLabel":"Active","checked":"2026-11-24","base":null}</script>
+<script>
+'use strict';
+
+/* ================= configuration ================= */
+const qs = new URLSearchParams(location.search);
+const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+const BRANCH_RE = /^[A-Za-z0-9_./-]+$/;
+// Which project this copy of the page shows: build.py writes one config per project (repo, default branch, which
+// data sources it has, its place on the shared ladder). The page follows that repository unless ?repo= picks another
+// one (forks.js lists the forks that are moving).
+const CFG = JSON.parse(document.getElementById('project-config').textContent);
+const FEATURES = new Set(CFG.features || []);   // readme, coord, d3d, proof, security: Leonida's own data sources
+const HOME_REPO = CFG.repo;
+const REPO = REPO_RE.test(qs.get('repo') || '') ? qs.get('repo') : HOME_REPO;
+const BRANCH = BRANCH_RE.test(qs.get('branch') || '') ? qs.get('branch') : (CFG.branch || 'main');
+const GH = 'https://github.com/' + REPO;
+const SYNC_MS = 60 * 1000;              // one sync a minute while the tab is visible
+const STATUS_MS = 5 * 60 * 1000;       // README, coordination issue, activity
+const SLOW_MS = 30 * 60 * 1000;        // repo stats, contributors, D3D tracker: they rarely change
+const CLOCK_MS = 1000;                 // status line countdown
+const D3D_TRACKER_FALLBACK = 4;       // CLHelper/Leonida#4, the copy of the original #313
+// The per-method D3D12 coverage was only ever kept in that tracker, which went with the original repository. Until a
+// repository keeps it again, the page reads the last copy (2026-11-23 19:23 UTC) and says so.
+const D3D_TRACKER_SNAPSHOT_REPO = 'CLHelper/Leonida';
+const D3D_TRACKER_SNAPSHOT_AT = '23 November';
+const RING_LEN = 540.35;               // 2 * PI * r (r = 86)
+const STORE_PREFIX = 'ldash:v2:' + REPO + ':';   // v2: cached data is scrubbed (see scrub below)
+const ITEMS_FIRST = 15;                 // work items shown before "Show more"
+const MORE_STEP = 20;                   // what each "Show more" adds, in every list
+const SCORE = { done: 1, wip: 0.5, research: 0.5, todo: 0 };
+// Act 4 (boot → playable) is a start-see-where-it-stops-fix loop of unknown length: "in progress" there says little
+// about how far along it is, so it counts a fifth instead of half. Keeps the ring from jumping when booting starts.
+const BOOT_ACT = 3;
+const BOOT_PARTIAL_SCORE = 0.2;
+const scoreFor = (status, act) => (act === BOOT_ACT && SCORE[status] === 0.5 ? BOOT_PARTIAL_SCORE : SCORE[status]);
+const CATS = [
+  { key: 'SHADER', re: /shader translator/i, label: 'Shader translator', icon: '⚡' },
+  { key: 'FUZZ',   re: /fuzz|correctness/i,  label: 'Translator fuzzing', icon: '🎯' },
+  { key: 'RT',     re: /runtime/i,           label: 'Runtime & loader',  icon: '🧠' },
+  { key: 'D3D',    re: /d3d12/i,             label: 'Graphics layer',    icon: '🔁' },
+  { key: 'ASSET',  re: /assets/i,            label: 'Assets & formats',  icon: '🎨' },
+  { key: 'BUILD',  re: /build pipeline/i,    label: 'Build pipeline',    icon: '🛠️' },
+  { key: 'TEST',   re: /tests/i,             label: 'Tests & CI',        icon: '🧪' },
+  { key: 'PROC',   re: /process/i,           label: 'Process & docs',    icon: '📚' },
+  { key: 'BOOT',   re: /boot|kernel|syscall|executable/i, label: 'Booting the game', icon: '🚀' },
+];
+const NEW_CAT_ICON = '🧩';
+const ACTS = [
+  { title: 'Unpack the game', sub: 'Read your copy and get everything out of it' },
+  { title: 'Translate the graphics', sub: 'Rewrite the console\'s GPU programs for PC' },
+  { title: 'Rebuild the console', sub: 'Stand in for the Xbox system software and DirectX' },
+  { title: 'Boot & play', sub: 'Start the real game and make it playable' },
+];
+// Plain-language stages. `match` is tested against the "What" column of the README status table.
+const STAGES = [
+  { key: 'copy', act: 0, w: 2, icon: '🎮', match: /finding|checking your copy/i, title: 'Recognise your own copy', plain: 'Finds the game files you own on your PC and checks the exact version.' },
+  { key: 'carve', act: 0, w: 3, icon: '🧩', match: /carve|disassembl/i, title: 'Extract the graphics programs', plain: 'Pulls every shader (a small program the GPU runs) out of the console package.' },
+  { key: 'models', act: 0, w: 3, icon: '🏗️', match: /^models/i, title: '3D models', plain: 'Characters, cars and buildings exported in a PC format.' },
+  { key: 'textures', act: 0, w: 3, icon: '🎨', match: /texture/i, title: 'Textures', plain: 'The images painted on every surface of the world.' },
+  { key: 'audio', act: 0, w: 2, icon: '🔊', match: /audio bank/i, title: 'Sound & speech', plain: 'Every sound bank exported and playable on PC.' },
+  { key: 'radio', act: 0, w: 1, icon: '📻', match: /music|radio/i, title: 'Radio stations', plain: 'How music and radio are put together, measured.' },
+  { key: 'translate', act: 1, w: 8, icon: '⚡', match: /spir-?v translation/i, title: 'Translate graphics for PC GPUs', plain: 'Every console shader rewritten for Vulkan, the PC graphics API.' },
+  { key: 'gpucheck', act: 1, w: 5, icon: '🖥️', match: /real gpu/i, title: 'Proven on real graphics cards', plain: 'Test shaders run on dozens of NVIDIA, AMD, Intel and Apple GPUs.' },
+  { key: 'loader', act: 2, w: 10, icon: '🧠', match: /pe loader|import shims/i, title: 'Run the game code on Windows', plain: 'A loader runs the Xbox program natively and stands in for the console\'s system software.' },
+  { key: 'd3d', act: 2, w: 15, icon: '🔁', match: /d3d12/i, title: 'Xbox graphics → Vulkan', plain: 'Every DirectX 12 call the game makes, answered with Vulkan.', coverage: true },
+  { key: 'boot', act: 3, w: 15, icon: '🚀', match: /booting/i, title: 'Boot the game', plain: 'Start the real game executable and get through its startup.' },
+  // The last three have no README row yet; `match` picks one up as soon as the maintainers add it.
+  { key: 'frame', act: 3, w: 12, icon: '🖼️', match: /first frame|loading screen|title screen|main menu/i, title: 'First frame on screen', plain: 'A loading screen or menu drawn by the game itself.' },
+  { key: 'world', act: 3, w: 12, icon: '🌴', match: /open world|world (?:render|stream|draw)/i, title: 'The open world renders', plain: 'The world streams in and draws at a stable frame rate.' },
+  { key: 'play', act: 3, w: 9, icon: '🏁', match: /playable|story mode|gameplay/i, title: 'Playable', plain: 'Story mode, controls, audio and saves working together.' },
+];
+// README rows no stage knows about: boot-phase ones go to act 4, everything else to act 3.
+const BOOT_PHASE_RE = /boot|kernel|syscall|executable|\bexe\b|startup|\bmenu|first frame|\bsaves?\b|\bplay/i;
+const STATUS_LABEL = { done: 'Done', wip: 'In progress', research: 'Measured', todo: 'Not started' };
+
+/* ================= small helpers ================= */
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = n => (n == null || Number.isNaN(n)) ? '–' : Number(n).toLocaleString('en-US');
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FETCH_TIMEOUT_MS = 30 * 1000;
+/** Label of a "Show more" button with `left` entries still hidden. */
+const moreLabel = left => `Show ${fmt(Math.min(MORE_STEP, left))} more (${fmt(left)} left)`;
+
+/**
+ * fetch() that gives up after `ms`, reading the body included: a request GitHub never answers would otherwise keep the
+ * sync waiting (and the status bar on "Updating…") until the tab is closed. A timeout rejects with name 'TimeoutError'.
+ */
+async function fetchTimed(url, opts = {}, ms = FETCH_TIMEOUT_MS) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { ...opts, signal: ctrl.signal });
+    const body = await res.arrayBuffer();
+    return { res, text: () => new TextDecoder().decode(body), json: () => JSON.parse(new TextDecoder().decode(body)) };
+  } catch (e) {
+    if (e.name !== 'AbortError') throw e;
+    const err = new Error(`no answer within ${Math.round(ms / 1000)} s`);
+    err.name = 'TimeoutError';
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+const store = {
+  get(key) {
+    try { return JSON.parse(localStorage.getItem(STORE_PREFIX + key)); }
+    catch (e) { console.warn('[dashboard] storage read failed', key, e); return null; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); }
+    catch (e) { console.warn('[dashboard] storage write failed', key, e); }
+  },
+  del(key) {
+    try { localStorage.removeItem(STORE_PREFIX + key); }
+    catch (e) { console.warn('[dashboard] storage delete failed', key, e); }
+  },
+};
+const tokenStore = {
+  get() { try { return localStorage.getItem('ldash:token') || ''; } catch { return ''; } },
+  set(v) { try { v ? localStorage.setItem('ldash:token', v) : localStorage.removeItem('ldash:token'); } catch (e) { console.warn('[dashboard] token storage failed', e); } },
+};
+
+/* ================= name scrubbing =================
+ * Text from GitHub never shows the title of the game, its makers or its places: full names become "The Game",
+ * names inside identifiers or file names are masked, and links whose address contains one are dropped.
+ * The patterns use \x escapes on purpose, so the names themselves never appear in this file's source. */
+const NAMED = /g\x74a|gr\x61nd[\s_%20.-]*the\x66t|ro\x63kstar|t\x61ke[\s_-]?two|vi\x63e[\s_-]?city/i;
+const SCRUB_RULES = [
+  [/\b(?:gr\x61nd\s+the\x66t\s+au\x74o|g\x74a)(?:[\s:-]*(?:vi|v|iv|6|5|six))?\b(?:'s)?/gi, 'The Game'],
+  [/\bro\x63kstar(?:\s+(?:games|north|toronto|india|leeds|lincoln|london|new england|san diego|dundee))?\b/gi, 'the studio'],
+  [/\bt\x61ke[\s-]?two(?:\s+interactive)?\b/gi, 'the publisher'],
+  [/\bvi\x63e[\s_-]?city\b/gi, 'the city'],
+  [/gr\x61nd[\s_.-]*the\x66t[\s_.-]*au\x74o|ro\x63kstar|t\x61ke[\s_-]?two|vi\x63e[\s_-]?city/gi, '***'],
+  [/g\x74a[\s_.-]?(?:vi|6)|g\x74a/gi, '***'],
+];
+function scrub(text) {
+  if (typeof text !== 'string' || !NAMED.test(text)) return text;
+  let s = text
+    .replace(/\[([^\]]*)\]\(([^)]*)\)/g, (m, label, url) => (NAMED.test(url) ? label : m))
+    .replace(/https?:\/\/[^\s)>"'\]]+/g, url => (NAMED.test(url) ? '(link removed)' : url));
+  for (const [re, to] of SCRUB_RULES) s = s.replace(re, to);
+  return s;
+}
+function scrubDeep(value) {
+  if (typeof value === 'string') return scrub(value);
+  if (Array.isArray(value)) return value.map(scrubDeep);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, scrubDeep(v)]));
+  return value;
+}
+
+function ago(ts) {
+  if (!ts) return '';
+  const s = Math.max(0, (Date.now() - new Date(ts).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+
+/** Plain text from a markdown fragment (links keep their text). */
+function plain(md) {
+  return String(md ?? '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Safe inline markdown: escapes first, then adds code, bold, github links, #refs and @handles. */
+function md(text) {
+  let s = esc(String(text ?? '').replace(/<br\s*\/?>/gi, ' '));
+  s = s.replace(/\[([^\]]+)\]\((https:\/\/github\.com\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');                                  // drop any other link targets
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  s = s.replace(/(^|[\s(,;])#(\d{1,6})\b/g, `$1<a href="${GH}/issues/$2" target="_blank" rel="noopener">#$2</a>`);
+  s = s.replace(/(^|[\s(,;])@([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))/g, '$1<a href="https://github.com/$2" target="_blank" rel="noopener">@$2</a>');
+  return s;
+}
+
+function firstSentences(text, max = 230) {
+  const t = plain(text);
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const dot = cut.lastIndexOf('. ');
+  return (dot > 80 ? cut.slice(0, dot + 1) : cut.replace(/\s\S*$/, '') + '…');
+}
+
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function countUp(el, to, ms = 1400) {
+  if (reduceMotion || !Number.isFinite(to)) { el.textContent = fmt(to); return; }
+  const from = Number(el.dataset.v || 0);
+  const t0 = performance.now();
+  const step = t => {
+    const k = clamp((t - t0) / ms, 0, 1);
+    const e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(Math.round(from + (to - from) * e));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  el.dataset.v = to;
+  requestAnimationFrame(step);
+}
+
+const PART_OF = { '#liveBody': 'feed', '#queueBody': 'pipeline' };
+
+function showError(target, title, err) {
+  // On first paint from the browser's copy, a section with nothing saved keeps its placeholder.
+  if (cacheOnly) return;
+  // Waiting for a rate limit is not an error: the placeholder says so, with a countdown.
+  if (err instanceof RateLimitError) {
+    $(target).innerHTML = pendingHtml(PART_OF[target] || 'status');
+    return;
+  }
+  console.error('[dashboard]', title, err);
+  $(target).innerHTML = `<div class="err-box"><b>${esc(title)}</b><br>${esc(err && err.message ? err.message : err)}. ${err instanceof RateLimitError && err.resource === 'core' ? 'See the message at the top of the page.' : 'It retries on the next update.'}</div>`;
+}
+
+/* ================= GitHub access ================= */
+const rate = {};               // resource → { remaining, limit, reset } from the last answer
+const blockedUntil = {};       // resource → ms; no calls to that resource before then
+let anyStale = false;          // something this sync came from the browser cache
+let staleSince = 0;            // the oldest cached data shown this sync (ms)
+let tokenRefused = false;      // GitHub answered 401 to the saved token: the page carries on without it
+let cacheOnly = false;         // first paint: answer from what the browser kept, without calling GitHub
+let apiCalls = 0;              // requests this page made to the API, for the status bar
+
+class RateLimitError extends Error {
+  constructor(resource, reset) {
+    super(resource === 'search' ? "GitHub's search limit for this minute is used up" : "GitHub's hourly limit for your network is used up");
+    this.resource = resource;
+    this.reset = reset;
+  }
+}
+const resourceOf = path => path.startsWith('/search/') ? 'search' : 'core';
+const activeToken = () => tokenRefused ? '' : tokenStore.get();
+
+function fromCache(cached) {
+  anyStale = true;
+  staleSince = staleSince ? Math.min(staleSince, cached.at) : cached.at;
+  return { ...cached, stale: true };
+}
+
+/** Block a resource until GitHub's reset time when it says the limit is used up. */
+function noteLimit(res, resource) {
+  const retryAfter = Number(res.headers.get('retry-after'));
+  const reset = Number(res.headers.get('x-ratelimit-reset')) * 1000;
+  if (retryAfter > 0) blockedUntil[resource] = Date.now() + retryAfter * 1000;
+  else if (res.headers.get('x-ratelimit-remaining') === '0' && reset) blockedUntil[resource] = reset;
+}
+
+/**
+ * GET from the GitHub REST API with ETag caching in local storage.
+ * `pick` trims the response before it is cached; on failure the last cached copy is returned, marked stale.
+ * `maxAge` (ms) answers from the cache without asking GitHub while the cached copy is younger than that.
+ */
+async function api(path, pick = d => d, cacheKey = path, { maxAge = 0 } = {}) {
+  const url = 'https://api.github.com' + path;
+  const cached = store.get('api:' + cacheKey);
+  const sameUrl = cached && cached.url === url;
+  if (sameUrl && maxAge && Date.now() - cached.at < maxAge) return cached;
+  if (cacheOnly) {
+    if (cached) return cached;
+    throw new Error('not saved from an earlier visit');
+  }
+  const resource = resourceOf(path);
+  if (Date.now() < (blockedUntil[resource] || 0)) {
+    if (cached) return fromCache(cached);
+    throw new RateLimitError(resource, blockedUntil[resource]);
+  }
+  const headers = { Accept: 'application/vnd.github+json' };
+  const token = activeToken();
+  if (token) headers.Authorization = 'Bearer ' + token;
+  if (sameUrl && cached.etag) headers['If-None-Match'] = cached.etag;
+  let res;
+  let got;
+  apiCalls++;
+  try {
+    got = await fetchTimed(url, { headers });
+    res = got.res;
+  } catch (e) {
+    if (cached) return fromCache(cached);
+    throw new Error('Could not reach GitHub (' + e.message + ')');
+  }
+  const kind = res.headers.get('x-ratelimit-resource');
+  if (kind) {
+    rate[kind] = {
+      remaining: Number(res.headers.get('x-ratelimit-remaining')),
+      limit: Number(res.headers.get('x-ratelimit-limit')),
+      reset: Number(res.headers.get('x-ratelimit-reset')) * 1000,
+    };
+  }
+  if (res.status === 304 && sameUrl) {
+    const entry = { ...cached, at: Date.now() };
+    store.set('api:' + cacheKey, entry);
+    return entry;
+  }
+  if (!res.ok) {
+    if (res.status === 401 && token) {
+      tokenRefused = true;
+      console.warn('[dashboard] GitHub refused the saved token; continuing without it');
+    }
+    if (res.status === 403 || res.status === 429) noteLimit(res, resource);
+    if (cached) return fromCache(cached);
+    if ((blockedUntil[resource] || 0) > Date.now()) throw new RateLimitError(resource, blockedUntil[resource]);
+    throw new Error('GitHub answered ' + res.status + ' for ' + path);
+  }
+  const entry = { url, data: scrubDeep(pick(got.json())), etag: res.headers.get('etag'), link: res.headers.get('link'), at: Date.now() };
+  store.set('api:' + cacheKey, entry);
+  return entry;
+}
+
+/** A file from the branch, through raw.githubusercontent.com (not rate limited like the API). */
+async function rawFile(path) {
+  const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${path}`;
+  if (cacheOnly) {
+    const saved = store.get('raw:' + path);
+    if (saved) return saved;
+    throw new Error('not saved from an earlier visit');
+  }
+  try {
+    const { res, text } = await fetchTimed(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const entry = { data: scrub(text()), at: Date.now() };
+    store.set('raw:' + path, entry);
+    return entry;
+  } catch (e) {
+    const cached = store.get('raw:' + path);
+    if (cached) return fromCache(cached);
+    throw new Error('Could not load ' + path + ' (' + e.message + ')');
+  }
+}
+
+const searchQ = q => '/search/issues?q=' + encodeURIComponent(`repo:${REPO} ${q}`);
+const pickIssue = d => ({ number: d.number, title: d.title, body: d.body || '', html_url: d.html_url, updated_at: d.updated_at, comments: d.comments });
+
+/* ================= markdown parsing ================= */
+function splitSections(text, level) {
+  const re = new RegExp('^' + '#'.repeat(level) + ' (.+)$', 'gm');
+  const out = [];
+  let m;
+  let last = null;
+  while ((m = re.exec(text))) {
+    if (last) last.body = text.slice(last.start, m.index);
+    last = { title: m[1].trim(), start: re.lastIndex, body: '' };
+    out.push(last);
+  }
+  if (last) last.body = text.slice(last.start);
+  return out;
+}
+const findSection = (sections, re) => (sections.find(s => re.test(s.title)) || { body: '' }).body;
+
+function splitCells(line) {
+  return line.trim().replace(/^\|/, '').replace(/\|$/, '').split(/(?<!\\)\|/).map(c => c.trim());
+}
+
+/** All markdown tables in a block, each an array of row objects keyed by header. */
+function parseTables(text) {
+  const groups = [];
+  let cur = null;
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (/^\|.*\|$/.test(t)) {
+      if (!cur) { cur = []; groups.push(cur); }
+      cur.push(t);
+    } else {
+      cur = null;
+    }
+  }
+  return groups
+    .filter(g => g.length >= 2 && /^\|[\s:|-]+\|$/.test(g[1]))
+    .map(g => {
+      const head = splitCells(g[0]);
+      return g.slice(2).map(line => {
+        let cells = splitCells(line);
+        if (cells.length > head.length) {          // a stray "|" inside text: fold the extras into column 2
+          const extra = cells.length - head.length;
+          cells = [cells[0], cells.slice(1, 2 + extra).join(' | '), ...cells.slice(2 + extra)];
+        }
+        return Object.fromEntries(head.map((h, i) => [plain(h), cells[i] ?? '']));
+      });
+    });
+}
+
+function statusOf(text) {
+  const t = String(text).trim();
+  if (t.startsWith('✅')) return 'done';
+  if (t.startsWith('❌')) return 'todo';
+  if (t.startsWith('⚠')) return 'wip';
+  if (t.startsWith('?') || t.startsWith('❓')) return 'research';
+  return 'wip';
+}
+
+function parseReadme(text) {
+  const sec = splitSections(text, 2).find(s => /project status/i.test(s.title));
+  if (!sec) throw new Error('The README has no "Project status" section');
+  const bold = sec.body.match(/\*\*([^*]+)\*\*/);
+  const table = parseTables(sec.body)[0] || [];
+  // Merges have left the same row in the table more than once; each copy would count as one more stage.
+  const seen = new Set();
+  const rows = table.map(r => {
+    const vals = Object.values(r);
+    return { what: plain(r.What ?? vals[0]), status: (r.Status ?? vals[1] ?? '').trim() };
+  }).filter(r => { const k = r.what.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+  const h4 = text.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
+  return { headline: bold ? plain(bold[1]) : '', tagline: h4 ? plain(h4[1]) : '', rows };
+}
+
+/**
+ * Claimed items written as one line (since 2026-11-23): "SHADER-661 `owner` · ASSET-19 `owner` (waits for …) · …".
+ * Returns rows shaped like the table's: { ID, Owner, Status }.
+ */
+function parseClaimLine(body) {
+  const rows = [];
+  for (const m of body.matchAll(/(?:^|·)\s*([A-Z]+-\d+) `([^`]+)`(?: \(([^)]*)\))?/gm)) rows.push({ ID: m[1], Owner: m[2], Status: m[3] || '' });
+  return rows;
+}
+
+function parseWorkBlock(body) {
+  const table = parseTables(body)[0];
+  const rows = table && table.length ? table : parseClaimLine(body);
+  const plus = body.match(/Plus (\d+) with a PR/i);
+  const recent = (body.match(/Recently done:\s*(.+)/i) || [])[1] || '';
+  const done = [...recent.matchAll(/([A-Z]+-\d+) \(#(\d+)/g)].map(m => ({ id: m[1], pr: m[2] }));
+  const tracker = (body.match(/tracked in #(\d+)/i) || [])[1];
+  const inProgress = (body.match(/(\d+) items in progress/i) || [])[1];
+  return { rows, plusPr: plus ? Number(plus[1]) : 0, done, tracker: tracker ? Number(tracker) : null, inProgress: inProgress ? Number(inProgress) : null };
+}
+
+const catOfId = id => CATS.find(c => String(id).startsWith(c.key + '-'));
+
+function rowToItem(r, catKey, state) {
+  const idRaw = r.ID || '';
+  const id = plain(idRaw).replace('⭐', '').trim();
+  const owner = plain(r.Owner || '');
+  const pr = plain(r.PR || '');
+  const hasPr = /#\d+/.test(pr);
+  const hasOwner = owner && owner !== '—' && owner !== '-';
+  return {
+    id, star: idRaw.includes('⭐'), cat: catKey || (catOfId(id) || {}).key || 'OTHER',
+    what: r.What || r.Item || '', why: r['Why it matters'] || '', needs: r.Needs || '', size: plain(r.Size || ''),
+    owner: hasOwner ? owner : '', pr: hasPr ? pr : '', status: r.Status || '',
+    state: state || (hasPr ? 'pr' : hasOwner ? 'claimed' : 'grab'),
+  };
+}
+
+function parseBlocked(text) {
+  const para = (text.match(/\*\*Blocked, not up for grabs yet:\*\*\s*(.+)/) || [])[1];
+  if (!para) return [];
+  return para.split(/;\s(?=[A-Z]+-\d+\s)/).map(part => {
+    const id = (part.match(/^([A-Z]+-\d+)/) || [])[1] || '';
+    const at = part.lastIndexOf('(waits for ');
+    const what = (at > 0 ? part.slice(id.length, at) : part.slice(id.length)).trim();
+    const waits = at > 0 ? part.slice(at + 11).replace(/\)\.?\s*$/, '').replace(/^waits for /, '') : '';
+    return { id, what, waits };
+  }).filter(b => b.id);
+}
+
+/** Key for a work area the page doesn't know yet: the ID prefix its rows share (BOOT-3 → BOOT), else OTHER. */
+function newCatKey(rows) {
+  const prefix = rows.map(r => (plain(r.ID || '').match(/([A-Z]+)-\d+/) || [])[1]).find(Boolean);
+  return prefix && !CATS.some(c => c.key === prefix) ? prefix : 'OTHER';
+}
+
+/**
+ * "Ready for review" lists PRs per group. The coordinator has written them two ways:
+ * `#379 ✓5`, `#2035 ✓1 (CI running)` (2026-11-22, later) and `#379 (BUILD-36; CI running; checked: @a, @b +3)` (earlier).
+ * Returns { number: { group, item, ciRunning, checked } }, checked being how many people tested or read it.
+ */
+function parseReviewPrs(text) {
+  const out = {};
+  let group = '';
+  for (const line of text.split('\n')) {
+    const g = line.match(/^- \*\*(.+?)\*\* \(\d+\)/);
+    if (g) group = g[1];
+    for (const m of line.matchAll(/#(\d+)(\s*✓\d+)?(?:\s*\(([^)]*)\))?/g)) {
+      const tick = m[2] ? Number(m[2].replace(/\D/g, '')) : null;
+      const inner = m[3] || '';
+      const checkedPart = (inner.match(/checked:([^;]*)/) || [])[1] || '';
+      const more = Number((checkedPart.match(/\+(\d+)/) || [])[1] || 0);
+      out[m[1]] = {
+        group, item: (inner.match(/^([A-Z]+-\d+)/) || [])[1] || '', ciRunning: /CI running/i.test(inner),
+        checked: tick ?? (checkedPart.match(/@[A-Za-z0-9-]+/g) || []).length + more,
+      };
+    }
+  }
+  return out;
+}
+
+function parseCoordination(body) {
+  const secs = splitSections(body, 3);
+  const grabsBody = findSection(secs, /^up for grabs/i);
+  const out = {
+    updated: (body.match(/_Updated ([^_]+?) by/) || [])[1] || '',
+    grabs: (parseTables(grabsBody)[0] || []).map(r => rowToItem(r, null, 'grab')),
+    blocked: parseBlocked(grabsBody),
+    review: [],
+    reviewPrs: {},
+    rebase: 0,
+    rebaseBy: [],
+    stale: [],
+    decisions: [],
+    chains: [],
+    hotspots: 0,
+    categories: [],
+    d3dTracker: null,
+  };
+  const reviewBody = findSection(secs, /^ready for review/i);
+  for (const m of reviewBody.matchAll(/^- \*\*(.+?)\*\* \((\d+)\)/gm)) out.review.push({ group: m[1], n: Number(m[2]) });
+  out.reviewPrs = parseReviewPrs(reviewBody);
+  const rebaseBody = findSection(secs, /^needs a rebase/i);
+  out.rebase = (rebaseBody.match(/#\d+/g) || []).length;
+  out.rebaseBy = [...rebaseBody.matchAll(/^- @([A-Za-z0-9-]+): (.+)$/gm)].map(m => ({ user: m[1], prs: m[2].match(/\d+/g) || [] }));
+  const staleBody = findSection(secs, /^claimed for/i);
+  for (const m of staleBody.matchAll(/([A-Z]+-\d+) @([A-Za-z0-9-]+) \((\d+)h\)/g)) out.stale.push({ id: m[1], owner: '@' + m[2], hours: Number(m[3]) });
+  out.decisions = [...findSection(secs, /^decisions/i).matchAll(/^- (.+)$/gm)].map(m => m[1]);
+  out.chains = [...findSection(secs, /^merge chains/i).matchAll(/^- (#\d+(?: → #\d+)+)/gm)].map(m => m[1].split(' → '));
+  out.hotspots = (findSection(secs, /^files changed by more than one/i).match(/hot spot/g) || []).length;
+  for (const sub of splitSections(findSection(secs, /^open work/i), 4)) {
+    const cat = CATS.find(c => c.re.test(sub.title));
+    const block = parseWorkBlock(sub.body);
+    if (cat && cat.key === 'D3D' && block.tracker) out.d3dTracker = block.tracker;
+    out.categories.push({ key: cat ? cat.key : newCatKey(block.rows), label: cat ? cat.label : plain(sub.title), ...block });
+  }
+  return out;
+}
+
+function parseD3D(body) {
+  const secs = splitSections(body, 3);
+  const critical = [...findSection(secs, /^critical path/i).matchAll(/^\d+\.\s+(.+)$/gm)].map(m => m[1]);
+  const coverageTables = parseTables(findSection(secs, /^method coverage/i));
+  const num = v => Number(plain(v).replace(/[^\d]/g, '')) || 0;
+  const methods = (coverageTables[0] || []).map(r => ({
+    iface: plain(r.Interface), total: num(r.Methods), main: num(r['On `main`'] ?? r['On main']), prs: num(r['In open PRs']), open: num(r.Open),
+  })).filter(m => m.iface && m.total);
+  const objects = (coverageTables[1] || []).map(r => {
+    const onMain = plain(r['On `main`'] ?? r['On main'] ?? '');
+    const prs = plain(r['In open PRs'] ?? '');
+    return { iface: plain(r.Interface), need: plain(r['Needed for'] || ''), state: /^yes/i.test(onMain) ? 'done' : /#\d+/.test(prs) ? 'pr' : 'none' };
+  }).filter(o => o.iface);
+  const work = parseWorkBlock(findSection(secs, /^who builds what/i));
+  return {
+    critical, methods, objects,
+    grabs: (parseTables(findSection(secs, /^up for grabs/i))[0] || []).map(r => rowToItem(r, 'D3D', 'grab')),
+    rows: work.rows.map(r => rowToItem(r, 'D3D')),
+    plusPr: work.plusPr, done: work.done,
+    decisions: [...findSection(secs, /^decisions/i).matchAll(/^- (.+)$/gm)].map(m => m[1]),
+  };
+}
+
+/* ================= model: everything the page shows ================= */
+function buildStages(readme, coverage) {
+  const used = new Set();
+  const stages = STAGES.map(def => {
+    const idx = def.match ? readme.rows.findIndex((r, i) => !used.has(i) && def.match.test(r.what)) : -1;
+    if (idx >= 0) used.add(idx);
+    const row = idx >= 0 ? readme.rows[idx] : null;
+    let status = row ? statusOf(row.status) : 'todo';
+    let score = scoreFor(status, def.act);
+    if (def.coverage && coverage && status === 'wip') score = clamp(coverage.main / coverage.total, 0.05, 0.95);
+    return { ...def, status, score, detail: row ? row.status.replace(/^(✅|⚠️|⚠|❌|\?)\s*/, '') : '' };
+  });
+  readme.rows.forEach((r, i) => {          // rows the catalogue doesn't know yet still count
+    if (used.has(i)) return;
+    const status = statusOf(r.status);
+    const act = BOOT_PHASE_RE.test(r.what) ? BOOT_ACT : 2;
+    stages.push({ key: 'extra' + i, act, w: 2, icon: '🔧', title: r.what, plain: '', status, score: scoreFor(status, act), detail: r.status.replace(/^(✅|⚠️|⚠|❌|\?)\s*/, '') });
+  });
+  return stages;
+}
+
+function overall(stages) {
+  const total = stages.reduce((a, s) => a + s.w, 0);
+  const got = stages.reduce((a, s) => a + s.w * s.score, 0);
+  return total ? Math.round((got / total) * 100) : 0;
+}
+
+/* ================= renderers ================= */
+function renderHero(m) {
+  const { readme, stages, pct, coverage, activity, repo } = m;
+  if (readme) {
+    if (readme.tagline) $('#tagline').textContent = readme.tagline;
+    const head = $('#headline');
+    head.textContent = (readme.headline ? readme.headline : 'Status table loaded') ;
+    head.classList.toggle('ok', !/not|no /i.test(readme.headline));
+  }
+  if (!FEATURES.has('readme')) {
+    $('#tagline').textContent = CFG.summary;
+    const head = $('#headline');
+    head.textContent = `Stage ${CFG.stageN} of ${CFG.ladder.length}: ${CFG.stageLabel}`;
+    head.classList.toggle('ok', CFG.stage === CFG.ladder[CFG.ladder.length - 1].key);
+  }
+  if (stages) {
+    countUp($('#pct'), pct);
+    $('#ringBar').style.strokeDashoffset = String(RING_LEN * (1 - pct / 100));
+    const done = stages.filter(s => s.status === 'done').length;
+    $('#ringSub').textContent = FEATURES.has('readme')
+      ? `${done} of ${stages.length} milestones done · booting and playing weigh the most`
+      : `${done} of ${stages.length} ladder stages done · now: ${CFG.stageLabel}`;
+  }
+  const translate = readme && readme.rows.find(r => /spir-?v translation/i.test(r.what));
+  const shaderCount = translate && (translate.status.match(/All ([\d,]+) translated/i) || [])[1];
+  const chips = [
+    shaderCount ? { v: shaderCount, l: 'shaders translated' } : null,
+    coverage ? { v: `${coverage.main}/${coverage.total}`, l: 'DirectX calls built' } : null,
+    activity ? { v: fmt(activity.merged), l: 'PRs merged in 24h' } : null,
+    activity ? { v: fmt(activity.commits), l: 'commits in 24h' } : null,
+    activity ? { v: fmt(activity.openPrs), l: 'open pull requests' } : null,
+    repo ? { v: fmt(repo.contributors) + (repo.contributorsCapped ? '+' : ''), l: 'contributors' } : null,
+    repo ? { v: fmt(repo.stars), l: 'stars' } : null,
+    repo ? { v: fmt(repo.forks), l: 'forks' } : null,
+  ].filter(Boolean).slice(0, 6);
+  $('#chips').innerHTML = chips.map(c => `<div class="chip"><b>${esc(c.v)}</b><span>${esc(c.l)}</span></div>`).join('');
+}
+
+function renderJourney(stages, pct) {
+  const acts = ACTS.map((a, i) => {
+    const list = stages.filter(s => s.act === i);
+    const w = list.reduce((x, s) => x + s.w, 0) || 1;
+    const p = Math.round(list.reduce((x, s) => x + s.w * s.score, 0) / w * 100);
+    const doneW = list.filter(s => s.status === 'done').reduce((x, s) => x + s.w, 0) / w * 100;
+    const partW = list.filter(s => s.status !== 'done').reduce((x, s) => x + s.w * s.score, 0) / w * 100;
+    return `<article class="act">
+      <div class="act-top"><div><div class="act-no">Act ${i + 1}</div><h3>${esc(a.title)}</h3></div><div class="act-pct">${p}%</div></div>
+      <div class="meter"><i class="m-done" style="width:${doneW.toFixed(1)}%"></i><i class="m-wip" style="width:${partW.toFixed(1)}%"></i></div>
+      <div style="font-size:13px;color:var(--muted)">${esc(a.sub)}</div>
+      ${list.map(s => `<div class="stage ${s.status}">
+        <div class="ico" aria-hidden="true">${s.icon}</div>
+        <div><h4>${esc(s.title)}</h4>${s.plain ? `<p>${esc(s.plain)}</p>` : ''}
+          <span class="pill ${s.status}">${STATUS_LABEL[s.status]}${s.coverage && s.status === 'wip' ? ' · ' + Math.round(s.score * 100) + '%' : ''}</span>
+          ${s.detail ? `<details class="more"><summary>What the project says</summary><div>${md(firstSentences(s.detail, 420))}</div></details>` : ''}
+        </div></div>`).join('')}
+    </article>`;
+  }).join('');
+  $('#journeyBody').innerHTML = `<div class="acts">${acts}</div>
+    <p class="footnote">How the ${pct}% is worked out: each stage has a weight (booting, the first frame, the open world and playing together weigh ${STAGES.filter(s => s.act === 3).reduce((a, s) => a + s.w, 0)}%). Done counts fully, in progress or measured counts half, and the graphics layer counts the share of DirectX calls already on <code>${esc(BRANCH)}</code>. In act 4 "in progress" counts only a fifth: booting is a loop of start, see where it stops, fix, and being in it says little about how close the end is. The weights are fixed, so the number doesn't know how big a stage really is: once developers have the executable, booting may turn out to be far more work than its share suggests. New stages in the status table or new DirectX calls in the tracker lower the number. It's a rough gauge, not a release date.</p>`;
+}
+
+function bigBlocker(exe, stages) {
+  if (exe) {
+    return `<div class="big-block"><div class="tag">Biggest blocker · ${esc(exe.id)}</div>
+        <h3>Booting needs the game's executable</h3>
+        <p>${md(exe.what)}. Waiting for: ${md(exe.waits)}. Everything that can be built without it is being built now, so booting work can start as soon as a developer has one.</p></div>`;
+  }
+  // No executable blocker listed any more: the boot phase has started. Show the first unfinished act-4 stage.
+  const next = (stages || []).find(s => s.act === 3 && s.status !== 'done');
+  if (next) {
+    return `<div class="big-block" style="border-color:rgba(255,182,72,.45)"><div class="tag" style="color:var(--wip)">Now working on · Act 4</div>
+        <h3>${esc(next.title)}</h3>
+        <p>${esc(next.plain)} There is no unlocked console to compare against, so this is a loop: start the game, see where it stops,
+        build the missing piece, start again. Expect weeks to months, not days.</p></div>`;
+  }
+  return `<div class="big-block" style="border-color:rgba(255,182,72,.45)"><div class="tag" style="color:var(--wip)">Biggest blocker</div>
+        <h3>The review queue</h3><p>Nothing is listed as hard-blocked right now. The bottleneck is getting open pull requests reviewed, tested and merged.</p></div>`;
+}
+
+function renderBlockers(coord, d3d, stages) {
+  if (!coord) throw new Error('No coordination issue found');
+  const exe = coord.blocked.find(b => /executable/i.test(b.what + b.waits));
+  const big = bigBlocker(exe, stages);
+  const others = coord.blocked.filter(b => b !== exe);
+  const blockedList = others.length ? `<div class="subhead">Also blocked</div><div class="list">${others.map(b =>
+    `<div class="li"><span class="k">${esc(b.id)}</span><div>${md(b.what)}<span class="waits">Waiting for: ${md(b.waits)}</span></div></div>`).join('')}</div>` : '';
+  const critical = d3d && !d3dSnapshot && d3d.critical.length ? `<div class="subhead">Critical path · most graphics work waits on these</div><div class="list">${d3d.critical.map((c, i) =>
+    `<div class="li"><span class="k amber">Step ${i + 1}</span><div>${md(c)}</div></div>`).join('')}</div>` : '';
+  const decisions = [...coord.decisions, ...(d3d && !d3dSnapshot ? d3d.decisions : [])];
+  const seen = new Set();
+  const uniq = decisions.filter(d => { const k = plain(d).slice(0, 60); if (seen.has(k)) return false; seen.add(k); return true; });
+  const decisionList = uniq.length ? `<div class="subhead">Waiting on a maintainer decision</div><div class="list">${uniq.map(d =>
+    `<div class="li"><span class="k violet">Decide</span><div>${md(firstSentences(d, 320))}</div></div>`).join('')}</div>` : '';
+  const reviewTotal = coord.review.reduce((a, r) => a + r.n, 0);
+  const longest = coord.chains.reduce((a, c) => Math.max(a, c.length), 0);
+  $('#blockersBody').innerHTML = `<div class="blockers">
+    <div>${big}
+      <div class="pressure">
+        <div class="chip"><b>${fmt(reviewTotal)}</b><span>PRs ready, waiting for review or a GPU test</span></div>
+        <div class="chip"><b>${fmt(coord.rebase)}</b><span>PRs that need a rebase after merges</span></div>
+        <div class="chip"><b>${longest ? fmt(longest) : '–'}</b><span>PRs in the longest merge chain</span></div>
+      </div>
+      ${blockedList}
+    </div>
+    <div>${critical}${decisionList}</div>
+  </div>`;
+}
+
+function renderGraphics(d3d, coverage) {
+  if (!d3d || !coverage) throw new Error('The D3D12 tracker has no method coverage table');
+  const p = Math.round(coverage.main / coverage.total * 100);
+  const pPr = Math.round((coverage.main + coverage.prs) / coverage.total * 100);
+  const rows = d3d.methods.map(m => `<div class="iface"><span class="name" title="${esc(m.iface)}">${esc(m.iface)}</span>
+    <div class="stack" role="img" aria-label="${esc(`${m.main} built, ${m.prs} in PRs, ${m.open} open of ${m.total}`)}">
+      <i style="width:${(m.main / m.total * 100).toFixed(1)}%;background:var(--done)"></i>
+      <i style="width:${(m.prs / m.total * 100).toFixed(1)}%;background:var(--wip)"></i></div>
+    <span class="n">${m.main}/${m.total}</span></div>`).join('');
+  const objs = d3d.objects.map(o => `<span class="obj ${o.state}" title="${esc(o.need)}">${o.state === 'done' ? '✓ ' : o.state === 'pr' ? '◐ ' : '○ '}${esc(o.iface.replace(/^ID3D12/, ''))}</span>`).join('');
+  const ms = [['M0', 'Clear screen'], ['M1', 'Triangle'], ['M2', 'Textures'], ['M3', 'First game frame'], ['M4', 'Streaming'], ['M5', 'Open world'], ['M6', 'Ray tracing'], ['M7', 'HDR & polish']];
+  $('#graphicsBody').innerHTML = `<div class="gfx">
+    <div class="card gfx-big">
+      <b>${p}%</b><div class="of">of the tracked DirectX 12 calls are built${d3dSnapshot ? `, as the last tracker counted them on ${esc(D3D_TRACKER_SNAPSHOT_AT)}` : ` on <code>${esc(BRANCH)}</code>`} (${fmt(coverage.main)} of ${fmt(coverage.total)})</div>
+      <p style="color:var(--muted);margin:14px 0 0">Another <b style="color:var(--wip)">${fmt(coverage.prs)}</b> wait in open pull requests. With those merged it would be <b style="color:var(--text)">${pPr}%</b>.</p>
+      <div class="subhead">Objects the layer must create</div><div class="objs">${objs || '<span class="obj none">none listed</span>'}</div>
+    </div>
+    <div class="card">
+      <div class="legend"><span><i style="background:var(--done)"></i>Built</span><span><i style="background:var(--wip)"></i>In open PRs</span><span><i style="background:rgba(255,255,255,.15)"></i>Not started</span></div>
+      ${rows}
+      <div class="subhead">Boot milestones from the plan</div>
+      <div class="milestones">${ms.map(([k, v]) => `<div class="ms"><b>${k}</b>${esc(v)}</div>`).join('')}</div>
+      <p class="footnote">M0 to M2 can be done without the game's executable; from M3 on they need it. <a href="${GH}/blob/${esc(BRANCH)}/docs/d3d12_vulkan.md" target="_blank" rel="noopener">The full plan ↗</a>${d3dSnapshot ? ` The per-method counts were kept in a tracker issue of the original repository; these are its last numbers (${esc(D3D_TRACKER_SNAPSHOT_AT)}), until the plan keeps them again.` : ''}</p>
+    </div></div>`;
+}
+
+/** Activity: hourly merged/opened bars (activity.js fills the hours in), latest commits and who merged most. */
+function renderPulse(activity, commits) {
+  if (!activity) throw new Error('No activity data');
+  const hrs = hourSeries();
+  const max = Math.max(1, ...hrs.series.map(h => Math.max(h.merged, h.opened)));
+  const pct = v => (v / max * 100).toFixed(1) + '%';
+  const hh = ms => new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const bars = hrs.series.map(h => h.known
+    ? `<div class="hr" title="${hh(h.start)}: ${h.merged} merged, ${h.opened} opened"><i class="m" style="height:${pct(h.merged)}"></i><i class="o" style="height:${pct(h.opened)}"></i></div>`
+    : `<div class="hr unknown" title="${hh(h.start)}: still loading"><i></i></div>`).join('');
+  const top = hrs.known ? hrs.people.slice(0, 8) : [];   // a few merges from the feed alone would mislead
+  const loading = hrs.known < hrs.series.length ? ' Striped hours are still loading; they are fetched once and kept in this browser.' : '';
+  const feed = (commits || []).slice(0, 30).map(c => `<a class="row" href="${esc(c.url)}" target="_blank" rel="noopener">
+      ${c.avatar ? `<img src="${esc(c.avatar)}&s=56" alt="" loading="lazy">` : '<span></span>'}
+      <span class="t" title="${esc(c.msg)}">${esc(c.msg)}</span><span class="when">${esc(ago(c.date))}</span></a>`).join('');
+  $('#pulseBody').innerHTML = `<div class="pulse-grid">
+    <div class="card">
+      <div style="display:flex;gap:28px;flex-wrap:wrap">
+        <div><div class="act-no">PRs merged</div><div class="act-pct" style="font-size:34px">${fmt(hrs.merged24 ?? activity.merged)}</div></div>
+        <div><div class="act-no">Commits</div><div class="act-pct" style="font-size:34px">${fmt(activity.commits)}</div></div>
+        <div><div class="act-no">Open PRs</div><div class="act-pct" style="font-size:34px">${fmt(pipe.fullAt ? pipe.prs.size : activity.openPrs)}</div></div>
+      </div>
+      ${hrs.known ? `<div class="bars-legend"><span><i style="background:var(--pink)"></i>merged</span><span><i style="background:var(--sun)"></i>opened</span></div>
+      <div class="bars" role="img" aria-label="Pull requests merged and opened per hour over the last 24 hours">${bars}</div>
+      <div class="bars-axis"><span>${hh(hrs.series[0].start)}</span><span>${hh(hrs.series[12].start)}</span><span>now</span></div>
+      <p class="footnote">Per clock hour. Merges come in rounds, so the merged bars spike. Opened counts PRs still open or merged.${esc(loading)}</p>
+      <p class="pending-msg" data-part-msg="activity"></p>` : `<div style="margin-top:14px">${pendingHtml('activity')}</div>`}
+      <div class="subhead">Latest commits on ${esc(BRANCH)}</div>
+      <div class="feed">${feed || '<span style="color:var(--muted)">No commits loaded.</span>'}</div>
+    </div>
+    <div class="card">
+      <div class="subhead" style="margin-top:0">Most merged ${hrs.known && hrs.known < hrs.series.length ? `in the last ${hrs.known} hours loaded` : 'in 24h'}</div>
+      <div class="people">${top.map(p => `<a href="https://github.com/${esc(p.user)}" target="_blank" rel="noopener">
+        <img src="${esc(p.avatar)}&s=56" alt="" loading="lazy"><span>@${esc(p.user)}</span><span class="c">${p.n} PR${p.n > 1 ? 's' : ''}</span></a>`).join('') || `<span style="color:var(--muted)">${hrs.known ? 'No merges in the hours loaded.' : 'Shows up once the first hours of the chart have loaded.'}</span>`}</div>
+    </div></div>`;
+}
+
+/* work board state */
+const board = { items: [], cat: 'ALL', state: 'all', q: '', shown: ITEMS_FIRST, cats: [] };
+
+function buildBoard(coord, d3d) {
+  const items = [];
+  const seen = new Map();
+  const add = it => {
+    if (!it.id) return;
+    const prev = seen.get(it.id);
+    if (prev) { if (prev.state === 'grab' && it.state !== 'grab') Object.assign(prev, it); return; }
+    seen.set(it.id, it);
+    items.push(it);
+  };
+  const staleIds = new Map((coord ? coord.stale : []).map(s => [s.id, s.hours]));
+  if (coord) {
+    coord.grabs.forEach(add);
+    coord.blocked.forEach(b => add({ id: b.id, cat: (catOfId(b.id) || {}).key || 'OTHER', what: b.what, why: '', needs: '', owner: '', pr: '', status: 'waits for ' + b.waits, state: 'blocked' }));
+    coord.categories.forEach(c => c.rows.forEach(r => add(rowToItem(r, c.key === 'OTHER' ? null : c.key))));
+  }
+  // A tracker snapshot from another repository gives the coverage numbers only: its rows name that repository's PRs.
+  const liveD3d = d3d && !d3dSnapshot ? d3d : null;
+  if (liveD3d) { liveD3d.grabs.forEach(add); liveD3d.rows.forEach(add); }
+  items.forEach(it => { if (it.state === 'claimed' && staleIds.has(it.id)) { it.state = 'stale'; it.hours = staleIds.get(it.id); } });
+
+  const newCats = (coord ? coord.categories : [])
+    .filter(x => !CATS.some(c => c.key === x.key))
+    .map(x => ({ key: x.key, label: x.label, icon: NEW_CAT_ICON }));
+  const cats = [...CATS, ...newCats].map(c => {
+    const block = coord ? coord.categories.find(x => x.key === c.key) : null;
+    const mine = items.filter(i => i.cat === c.key);
+    const extraPr = c.key === 'D3D' && liveD3d ? liveD3d.plusPr : (block ? block.plusPr : 0);
+    const done = c.key === 'D3D' && liveD3d ? liveD3d.done : (block ? block.done : []);
+    return {
+      ...c,
+      grab: mine.filter(i => i.state === 'grab').length,
+      claimed: mine.filter(i => i.state === 'claimed' || i.state === 'stale').length,
+      blocked: mine.filter(i => i.state === 'blocked').length,
+      pr: mine.filter(i => i.state === 'pr').length + extraPr,
+      done,
+      tracked: c.key === 'D3D' && block ? block.inProgress : null,
+    };
+  });
+  board.items = items;
+  board.cats = cats.filter(c => c.grab + c.claimed + c.blocked + c.pr + c.done.length > 0);   // e.g. Booting before its section exists
+}
+
+function renderWork(coord) {
+  const cats = board.cats.map(c => {
+    const total = c.grab + c.claimed + c.blocked + c.pr;
+    const w = v => total ? (v / total * 100).toFixed(1) : 0;
+    return `<button class="cat ${board.cat === c.key ? 'on' : ''}" data-cat="${c.key}" type="button">
+      <div class="top"><span class="nm">${c.icon} ${esc(c.label)}</span><span class="tot">${total}</span></div>
+      <div class="meter"><i class="m-done" style="width:${w(c.pr)}%"></i><i class="m-wip" style="width:${w(c.claimed)}%"></i><i class="m-grab" style="width:${w(c.grab + c.blocked)}%"></i></div>
+      <div class="bk"><span><em style="color:var(--done)">${c.pr}</em> in a PR</span><span><em style="color:var(--wip)">${c.claimed}</em> claimed</span><span><em style="color:var(--pink)">${c.grab}</em> open</span>${c.blocked ? `<span><em style="color:var(--todo)">${c.blocked}</em> blocked</span>` : ''}</div>
+    </button>`;
+  }).join('');
+  const review = coord && coord.review.length ? `<div class="subhead">Ready for review or a test · pick one that fits your hardware</div>
+    <div class="review-groups">${coord.review.map(r => `<div class="rg"><b>${r.n}</b><span>${esc(r.group)}</span></div>`).join('')}</div>` : '';
+  const recent = board.cats.flatMap(c => c.done);
+  const recentHtml = recent.length ? `<div class="subhead">Recently shipped</div><div class="done-strip">${recent.map(d =>
+    `<a href="${GH}/pull/${esc(d.pr)}" target="_blank" rel="noopener">✓ ${esc(d.id)}</a>`).join('')}</div>` : '';
+  const states = [['all', 'All'], ['grab', 'Up for grabs'], ['claimed', 'Claimed'], ['stale', 'Claim going stale'], ['pr', 'Has a PR'], ['blocked', 'Blocked']];
+  $('#workBody').innerHTML = `
+    <div class="cats">${cats}</div>
+    ${review}
+    ${recentHtml}
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Search ID, task, owner or PR…" value="${esc(board.q)}" aria-label="Search work items">
+      <div class="seg" id="stateSeg">${states.map(([k, l]) => `<button type="button" data-state="${k}" class="${board.state === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${board.cat !== 'ALL' ? '<button class="btn" id="clearCat" type="button">Show all areas ✕</button>' : ''}
+    </div>
+    <div id="itemList"></div>`;
+  renderItems();
+  $('#workBody').querySelectorAll('.cat').forEach(b => b.addEventListener('click', () => {
+    board.cat = board.cat === b.dataset.cat ? 'ALL' : b.dataset.cat;
+    board.shown = ITEMS_FIRST;
+    renderWork(coord);
+  }));
+  $('#stateSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    board.state = b.dataset.state;
+    board.shown = ITEMS_FIRST;
+    renderWork(coord);
+  }));
+  const clear = $('#clearCat');
+  if (clear) clear.addEventListener('click', () => { board.cat = 'ALL'; renderWork(coord); });
+  $('#q').addEventListener('input', e => { board.q = e.target.value; board.shown = ITEMS_FIRST; renderItems(); });
+}
+
+const STATE_LABEL = { grab: 'Up for grabs', claimed: 'Claimed', stale: 'Going stale', pr: 'Has a PR', blocked: 'Blocked' };
+const STATE_ORDER = { grab: 0, blocked: 1, stale: 2, claimed: 3, pr: 4 };
+
+function renderItems() {
+  const q = board.q.trim().toLowerCase();
+  const list = board.items
+    .filter(i => board.cat === 'ALL' || i.cat === board.cat)
+    .filter(i => board.state === 'all' || i.state === board.state)
+    .filter(i => !q || [i.id, plain(i.what), i.owner, i.pr, plain(i.status)].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => (STATE_ORDER[a.state] - STATE_ORDER[b.state]) || (b.star - a.star));
+  const shown = list.slice(0, board.shown);
+  const html = shown.map(i => `<div class="item">
+      <div><div class="id">${i.star ? '⭐ ' : ''}${esc(i.id)}</div><span class="st ${i.state}">${STATE_LABEL[i.state]}${i.hours ? ' · ' + i.hours + 'h' : ''}</span></div>
+      <div><div class="what">${md(i.what)}</div>
+        ${i.why ? `<div class="note">Why: ${md(i.why)}</div>` : ''}
+        ${i.needs ? `<div class="note">Needs: ${md(i.needs)}${i.size ? ' · size ' + esc(i.size) : ''}</div>` : ''}
+        ${i.status && i.state !== 'grab' ? `<div class="note">${md(firstSentences(i.status, 260))}</div>` : ''}</div>
+      <div class="who">${i.owner ? md(i.owner) : (i.state === 'grab' ? 'Nobody yet: <b style="color:var(--pink)">claim it</b>' : '')}${i.pr ? '<br>PR ' + md(i.pr) : ''}</div>
+    </div>`).join('');
+  $('#itemList').innerHTML = `<div class="items">${html || '<div class="card" style="color:var(--muted)">Nothing matches.</div>'}</div>
+    ${list.length > shown.length ? `<button class="btn more-btn" id="moreBtn" type="button">${moreLabel(list.length - shown.length)}</button>` : ''}
+    <p class="footnote">${list.length} of ${board.items.length} tracked items. Items that only exist as an open PR are counted in the area totals above.</p>`;
+  const more = $('#moreBtn');
+  if (more) more.addEventListener('click', () => { board.shown += MORE_STEP; renderItems(); });
+}
+
+/* ================= share ================= */
+let summary = '';
+function buildSummary(m) {
+  const lines = [`🌴 ${CFG.name}, road to playable: ${m.pct}%`];
+  if (m.stages) lines.push(`✅ ${m.stages.filter(s => s.status === 'done').length}/${m.stages.length} ${FEATURES.has('readme') ? 'milestones' : 'ladder stages'} done`);
+  if (!FEATURES.has('readme')) lines.push(`📍 Stage ${CFG.stageN} of ${CFG.ladder.length}: ${CFG.stageLabel}`);
+  const translate = m.readme && m.readme.rows.find(r => /spir-?v translation/i.test(r.what));
+  const n = translate && (translate.status.match(/All ([\d,]+) translated/i) || [])[1];
+  if (n) lines.push(`⚡ ${n} console shaders translated for PC GPUs`);
+  if (m.coverage) lines.push(`🔁 Graphics layer: ${m.coverage.main}/${m.coverage.total} DirectX 12 calls built, ${m.coverage.prs} more in review`);
+  if (m.activity) lines.push(`🛠️ ${m.activity.merged} PRs merged in the last 24h`);
+  if (m.readme && m.readme.headline) lines.push(`🚧 ${m.readme.headline}`);
+  lines.push(GH);
+  return lines.join('\n');
+}
+
+async function copySummary() {
+  if (!summary) { toast('Still loading…'); return; }
+  try {
+    await navigator.clipboard.writeText(summary);
+    toast('Summary copied');
+  } catch (e) {
+    console.warn('[dashboard] clipboard failed, falling back', e);
+    const ta = document.createElement('textarea');
+    ta.value = summary;
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    toast(ok ? 'Summary copied' : 'Copy failed; select the text manually');
+  }
+}
+
+/* ================= load cycle ================= */
+// Shared with live.js: the coordination issue (its comments and the merge queue), main's latest commits (merge
+// rounds and what followed them) and the open PR count.
+let latestCoord = null;
+let latestCoordNo = null;
+let latestCoordRecent = [];    // [{ number, created, closed }] (ms), the current coordination issue and the ones before it
+let latestCommits = [];
+let latestOpenPrs = null;
+let latestActivity = null;
+let d3dSnapshot = false;      // coverage read from the last tracker copy, not from this repository
+
+const COORD_TITLE_RE = /coordinating who works on what/i;
+const COORD_MOVED_RE = /moved to #(\d+)/i;
+const COORD_FALLBACK = 14;    // ubiquitarianism/leonida#14, used when search has not indexed it
+const COORD_HOPS = 4;          // "moved to #N" links followed in one load
+const COORD_RECENT = 8;        // coordination issues asked for, newest first
+const pickCoord = d => ({ ...pickIssue(d), state: d.state, created_at: d.created_at, closed_at: d.closed_at });
+
+/**
+ * The coordination issue moves to a new number every 15 to 30 minutes: the old one is closed and its title ends in
+ * "(moved to #N)". Search lists the newest, but its index can trail behind, so the page follows the "moved to" links
+ * through the core API, and starts from the number it saw last when search has nothing newer or fails.
+ * Returns { issue, recent }, recent being the issues search and the links named, newest first.
+ */
+async function findCoordination() {
+  const known = Number(store.get('coordNo')) || COORD_FALLBACK;
+  let found = [];
+  try {
+    const r = await api(searchQ('is:issue "Coordinating who works on what" in:title') + `&sort=created&order=desc&per_page=${COORD_RECENT}`,
+      d => (d.items || []).filter(i => COORD_TITLE_RE.test(i.title)).map(pickCoord), 'coord');
+    found = r.data;
+  } catch (e) {
+    if (!known) throw e;
+    console.warn('[dashboard] coordination search failed; following the saved issue', e);
+  }
+  let issue = found.reduce((a, i) => (!a || i.number > a.number ? i : a), null);
+  if (!issue || known > issue.number) issue = (await api(`/repos/${REPO}/issues/${known}`, pickCoord, 'coordIssue')).data;
+  for (let hop = 0; hop < COORD_HOPS && issue.state === 'closed'; hop++) {
+    const next = Number((issue.title.match(COORD_MOVED_RE) || issue.body.match(COORD_MOVED_RE) || [])[1]);
+    if (!next || next <= issue.number) break;
+    found = [issue, ...found];
+    issue = (await api(`/repos/${REPO}/issues/${next}`, pickCoord, 'coordIssue')).data;
+  }
+  store.set('coordNo', issue.number);
+  const byNo = new Map([...found, issue].map(i => [i.number, {
+    number: i.number, created: Date.parse(i.created_at) || 0, closed: i.closed_at ? Date.parse(i.closed_at) : 0,
+  }]));
+  return { issue, recent: [...byNo.values()].sort((a, b) => b.number - a.number) };
+}
+
+/**
+ * The status tier: README, coordination issue, activity. Calls for data that rarely changes answer from the cache
+ * for SLOW_MS. Returns true when a key source failed.
+ */
+async function loadStatus() {
+  const since = new Date(Date.now() - 864e5).toISOString().slice(0, 13) + ':00:00Z';
+  const [readmeR, coordR, repoR, contribR, commitsR, mergedR, openR, commitCountR] = await Promise.allSettled([
+    FEATURES.has('readme') ? rawFile('README.md') : Promise.resolve(null),
+    FEATURES.has('coord') ? findCoordination() : Promise.resolve(null),
+    api(`/repos/${REPO}`, d => ({ stars: d.stargazers_count, forks: d.forks_count, watchers: d.subscribers_count }), undefined, { maxAge: SLOW_MS }),
+    api(`/repos/${REPO}/contributors?per_page=1&anon=1`, d => d.length, undefined, { maxAge: SLOW_MS }),
+    api(`/repos/${REPO}/commits?sha=${encodeURIComponent(BRANCH)}&per_page=100`, d => d.map(c => ({
+      msg: (c.commit.message || '').split('\n')[0], date: c.commit.committer && c.commit.committer.date, url: c.html_url,
+      avatar: c.author ? c.author.avatar_url : '',
+    }))),
+    api(searchQ(`is:pr is:merged merged:>=${since}`) + '&per_page=1', d => ({ total: d.total_count, items: [] }), 'merged24n', { maxAge: SLOW_MS }),
+    api(searchQ('is:pr is:open') + '&per_page=1', d => d.total_count, 'openprs', { maxAge: SLOW_MS }),
+    api('/search/commits?q=' + encodeURIComponent(`repo:${REPO} committer-date:>=${since}`) + '&per_page=1', d => d.total_count, 'commits24', { maxAge: SLOW_MS }),
+  ]);
+
+  const val = r => r.status === 'fulfilled' ? r.value : null;
+  const m = {};
+  if (FEATURES.has('readme')) {
+    try { m.readme = parseReadme(val(readmeR).data); } catch (e) { showError('#journeyBody', 'Could not read the project status table', readmeR.reason || e); }
+  }
+
+  let coord = null;
+  const coordFound = val(coordR);
+  if (coordFound) {
+    const coordIssue = coordFound.issue;
+    try {
+      coord = isCoordV2(coordIssue.body) ? await loadCoordinationV2(coordIssue) : parseCoordination(coordIssue.body);
+    } catch (e) { console.error('[dashboard] coordination parse failed', e); }
+    $('#claimLink').href = coordIssue.html_url;
+    latestCoordNo = coordIssue.number;
+    latestCoordRecent = coordFound.recent;
+  } else if (FEATURES.has('coord') && !cacheOnly) console.error('[dashboard] coordination issue', coordR.reason);
+  latestCoord = coord || latestCoord;
+
+  let d3d = null;
+  if (FEATURES.has('d3d')) {
+    const trackerNo = (coord && coord.d3dTracker) || D3D_TRACKER_FALLBACK;
+    const trackerRepo = coord && coord.d3dTracker ? REPO : D3D_TRACKER_SNAPSHOT_REPO;
+    d3dSnapshot = trackerRepo !== REPO;
+    try {
+      const r = await api(`/repos/${trackerRepo}/issues/${trackerNo}`, pickIssue, 'd3dtracker', { maxAge: SLOW_MS });
+      d3d = parseD3D(r.data.body);
+    } catch (e) { if (!cacheOnly) console.error('[dashboard] D3D tracker failed', e); }
+  }
+
+  if (d3d && d3d.methods.length) {
+    m.coverage = d3d.methods.reduce((a, x) => ({ total: a.total + x.total, main: a.main + x.main, prs: a.prs + x.prs }), { total: 0, main: 0, prs: 0 });
+  }
+  if (m.readme) {
+    m.stages = buildStages(m.readme, m.coverage);
+    m.pct = overall(m.stages);
+  } else if (!FEATURES.has('readme')) {
+    m.stages = ladderStages();
+    m.pct = Math.round(CFG.score);
+  }
+  const repo = val(repoR);
+  const contrib = val(contribR);
+  if (repo) {
+    let n = null;
+    let capped = false;
+    if (contrib) {
+      const last = (contrib.link || '').match(/[?&]page=(\d+)>; rel="last"/);
+      n = last ? Number(last[1]) : contrib.data;
+      capped = n >= 500;
+    }
+    m.repo = { ...repo.data, contributors: n, contributorsCapped: capped };
+  }
+  latestCommits = (val(commitsR) && val(commitsR).data) || latestCommits;
+  if (val(openR)) latestOpenPrs = val(openR).data;
+  const merged = val(mergedR);
+  if (merged) {
+    m.activity = {
+      // Counted from data the page keeps current when it has it, else from a count GitHub gives every 30 minutes.
+      merged: hourSeries().merged24 ?? merged.data.total, items: [],
+      openPrs: pipe.fullAt ? pipe.prs.size : (val(openR) ? val(openR).data : null),
+      commits: val(commitCountR) ? val(commitCountR).data : null,
+    };
+  }
+
+  renderHero(m);
+  latestActivity = m.activity || latestActivity;
+  try { renderPulse(m.activity, val(commitsR) && val(commitsR).data); } catch (e) { showError('#pulseBody', 'Could not load activity', mergedR.reason || e); }
+  if (!FEATURES.has('readme')) {
+    // A project without Leonida's own documents: the same sections, built from its ladder entry and its issues.
+    if (m.stages) renderLadderJourney(m.stages, m.pct);
+    renderLadderBlockers(m.stages);
+    renderProjectGraphics();
+    renderProjectProof();
+    await Promise.allSettled([renderIssues(), renderReleases()]);
+  } else {
+    if (m.stages) renderJourney(m.stages, m.pct);
+    try { renderBlockers(coord, d3d, m.stages); } catch (e) { showError('#blockersBody', 'Could not read the blockers', (!coordR.value && coordR.reason) || e); }
+    try { renderGraphics(d3d, m.coverage); } catch (e) { showError('#graphicsBody', 'Could not read the D3D12 tracker', e); }
+    try {
+      if (!coord && !d3d) throw (coordR.reason || new Error('No coordination issue found'));
+      buildBoard(coord, d3d);
+      renderWork(coord);
+    } catch (e) { showError('#workBody', 'Could not read the work board', e); }
+  }
+
+  summary = m.pct != null ? buildSummary(m) : '';
+  return [readmeR, coordR, mergedR].some(r => r.status === 'rejected');
+}
+
+/* ================= boot ================= */
+function init() {
+  $('#repoLink').href = GH;
+  $('#claimLink').href = GH + '/issues';
+  $('#branchName').textContent = BRANCH;
+  const cardParams = new URLSearchParams(location.search);
+  cardParams.set('card', '1');
+  $('#cardLink').href = '?' + cardParams.toString();
+  $('#cardUrl').textContent = 'github.com/' + REPO + ' · live dashboard';
+  if (qs.get('card')) document.body.classList.add('card-mode');
+  $('#refreshBtn').addEventListener('click', () => syncNow());
+  $('#copyBtn').addEventListener('click', copySummary);
+  $('#tokenInput').value = tokenStore.get() ? '••••••••' : '';
+  $('#tokenSave').addEventListener('click', () => saveToken($('#tokenInput').value));
+  $('#tokenClear').addEventListener('click', removeToken);
+  startSync();
+}
+// live.js loads after this script and holds the scheduler; start once both have run.
+document.addEventListener('DOMContentLoaded', init);
+</script>
+<script src="../assets/full/live.js"></script>
+<script src="../assets/full/activity.js"></script>
+<script src="../assets/full/pipeline.js"></script>
+<script src="../assets/full/triage.js"></script>
+<script src="../assets/full/project.js"></script>
+<script src="../assets/full/hardware-model.js"></script>
+<script src="../assets/full/hardware.js"></script>
+<script src="../assets/full/forks.js"></script>
+<script src="../assets/scrub.js"></script>
+<script src="../assets/ladder.js"></script>
+<script src="../assets/full/race.js"></script>
 </body>
 </html>
