@@ -1,0 +1,30 @@
+/* The milestone ladder and the project switcher: shared by the generated pages and the hand-made dashboards. */
+.switch { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.switch select { font: 600 14px var(--body); color: var(--text); background: #1a1236; border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; max-width: 70vw; }
+
+/* ---------- the milestone ladder (ladder.js) ---------- */
+.ladder-host { margin-top: 26px; }
+.ladder { position: relative; padding-top: 74px; }
+.ladder .track { position: relative; height: 34px; border-radius: 999px; background: #1b1534; overflow: hidden; }
+.ladder .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--violet), var(--pink) 70%, var(--orange)); }
+.ladder .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bg); opacity: .9; }
+.ladder .stops { position: relative; height: 46px; margin-top: 8px; }
+.ladder .stop { position: absolute; transform: translateX(-50%); text-align: center; font-size: 13px; white-space: nowrap; color: var(--dim); }
+.ladder .stop:first-child { transform: none; text-align: left; }
+.ladder .stop:last-child { transform: translateX(-100%); text-align: right; }
+.ladder .stop b { display: block; font: 700 12px var(--mono); }
+.ladder .stop.reached { color: var(--text); }
+.ladder .stop.reached b { color: var(--pink); }
+.ladder .stop::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 2px solid currentColor; margin-right: 5px; vertical-align: 0; }
+.ladder .stop.reached::before { background: var(--pink); border-color: var(--pink); }
+.ladder .pin { position: absolute; top: 0; height: 74px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+.ladder .pin a { display: block; line-height: 0; }
+.ladder .pin img, .ladder .pin .ph { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #2a2150; background: #2a2150; object-fit: cover; }
+.ladder .pin .stem { flex: 1; width: 2px; background: rgba(255,255,255,.25); }
+.ladder .pin.hl img, .ladder .pin.hl .ph { width: 40px; height: 40px; border: 3px solid var(--pink); box-shadow: 0 0 0 4px rgba(255,61,139,.25); }
+.ladder .pin.hl .stem { background: var(--pink); }
+.ladder .pin .tag { position: absolute; top: -26px; font: 700 12px var(--body); background: #1a1236; border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px; white-space: nowrap; }
+.ladder .pin.dim { opacity: .55; }
+.ladder .pin:hover { opacity: 1; z-index: 2; }
+@media (max-width: 760px) { .ladder .stop:not(.reached):not(:last-child) span { display: none; } }
+

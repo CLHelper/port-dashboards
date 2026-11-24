@@ -1,0 +1,67 @@
+{{topbar}}
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow"><span class="dot"></span> Live standings</div>
+      <h1>Does it run on PC yet? <span class="answer {{answer_class}}">{{answer}}</span></h1>
+      <p class="tagline">{{count}} open projects try to run the same Xbox Series game natively on a PC: compatibility layers,
+        recompilers, emulators and boot harnesses. Each is placed on one ladder from groundwork to playable, from what
+        its own README and commits report.</p>
+    </div>
+  </section>
+
+  <section class="overall">
+    <div class="wrap">
+      <div class="card big">
+        <div class="overall-top">
+          <div>
+            <div class="eyebrow muted">Overall progress · the closest effort</div>
+            <div class="big-pct">{{leader_score}}<small>%</small></div>
+            <p class="lead-line">Leader: <a href="{{leader_href}}">{{leader_name}}</a>, at “{{leader_stage}}”.</p>
+          </div>
+          <div class="tiles">
+            <div class="tile"><b>{{furthest}}</b><span>Furthest stage</span></div>
+            <div class="tile"><b>{{top3}}%</b><span>Top-3 average</span></div>
+            <div class="tile"><b>{{at_menus}}</b><span>Show the menus</span></div>
+            <div class="tile"><b>{{racing}}</b><span>Projects racing</span></div>
+          </div>
+        </div>
+        <div id="ladder" class="ladder-host" aria-label="Every project on the milestone ladder"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="standings">
+    <div class="wrap">
+      <h2>Standings</h2>
+      <p class="lede">Furthest first. A project's stage is the highest one its own sources clearly claim on the retail
+        game; a vague or second-hand claim counts as the stage below. Pick a name for its dashboard.</p>
+      <ol class="rows">{{rows}}</ol>
+    </div>
+  </section>
+
+  <section id="watched">
+    <div class="wrap">
+      <h2>Also watched</h2>
+      <ul class="watched">{{watched}}</ul>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="wrap two">
+      <div>
+        <h2>The ladder</h2>
+        <ol class="stages">{{stages}}</ol>
+      </div>
+      <div>
+        <h2>The approaches</h2>
+        <ul class="stages">{{kinds}}</ul>
+        <p class="note">Checked by hand on {{checked}} from each project's README, status notes and commits; the
+          activity lines update live from GitHub. Nothing here was run or verified by this page. Corrections are
+          welcome as issues on this page's repository.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot"><div class="wrap">Road to Playable · an independent community tracker, not affiliated with any of
+  the projects or with the game's makers · <a href="https://github.com/CLHelper/port-dashboards" target="_blank" rel="noopener">source</a></div></footer>
