@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- The share image (src/og-image.png, 1200x630) for every page without one of its own. Render it by opening this
+     file at a 1200x630 viewport and taking a screenshot; it holds no live numbers, so it never goes stale. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Road to Playable share card</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; color: #f5f0ff;
+    background:
+      radial-gradient(760px 420px at 88% 0%, rgba(255,61,139,.34), transparent 62%),
+      radial-gradient(700px 420px at 0% 0%, rgba(139,92,246,.34), transparent 60%),
+      linear-gradient(180deg, #160c34 0%, #0a0718 100%);
+    position: relative;
+  }
+  .grid { position: absolute; left: -40%; right: -40%; bottom: -30px; height: 230px;
+    background:
+      linear-gradient(transparent 0 calc(100% - 1px), rgba(255,61,139,.40) 0) 0 0 / 100% 30px,
+      linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(255,61,139,.40) 0) 0 0 / 56px 100%;
+    transform: perspective(300px) rotateX(62deg); transform-origin: bottom;
+    -webkit-mask-image: linear-gradient(transparent, #000 75%); mask-image: linear-gradient(transparent, #000 75%); }
+  .wrap { position: relative; padding: 58px 70px 0; }
+  .eyebrow { font: 700 18px ui-monospace, Consolas, monospace; letter-spacing: .22em; text-transform: uppercase; color: #ff9a3c; display: flex; align-items: center; gap: 12px; }
+  .eyebrow i { width: 12px; height: 12px; border-radius: 50%; background: #ff3d8b; box-shadow: 0 0 0 6px rgba(255,61,139,.22); }
+  h1 { font-weight: 900; font-size: 92px; line-height: .95; letter-spacing: -.03em; margin: 22px 0 14px; }
+  h1 span { background: linear-gradient(95deg, #ffd166, #ff9a3c 35%, #ff3d8b 70%, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { font-size: 30px; color: #d9d0f5; margin: 0; }
+  .ladder { position: absolute; left: 70px; right: 70px; top: 392px; }
+  .bar { height: 30px; border-radius: 999px; background: #1f1840; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
+  .bar b { position: absolute; inset: 0; background: linear-gradient(90deg, #8b5cf6, #ff3d8b 70%, #ff9a3c); }
+  .bar s { position: absolute; top: 0; bottom: 0; width: 3px; background: #0a0718; }
+  .stops { position: relative; height: 56px; margin-top: 12px; }
+  .stop { position: absolute; transform: translateX(-50%); text-align: center; font-size: 19px; font-weight: 600; white-space: nowrap; color: #e9e2ff; }
+  .stop:first-child { transform: none; text-align: left; }
+  .stop:last-child { transform: translateX(-100%); text-align: right; }
+  .stop em { display: block; font: 700 15px ui-monospace, Consolas, monospace; font-style: normal; color: #ff6fa8; }
+  .foot { position: absolute; left: 70px; right: 70px; bottom: 34px; display: flex; justify-content: space-between; align-items: center; font-size: 22px; color: #a99fc9; }
+  .foot b { color: #2ee6c8; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="wrap">
+  <div class="eyebrow"><i></i> Live dashboards</div>
+  <h1>Road to <span>Playable</span></h1>
+  <p class="sub">Does it run on PC yet? Every open project, one ladder.</p>
+</div>
+<div class="ladder">
+  <div class="bar"><b></b><s style="left:15%"></s><s style="left:25%"></s><s style="left:35%"></s><s style="left:50%"></s><s style="left:62%"></s><s style="left:78%"></s></div>
+  <div class="stops">
+    <div class="stop" style="left:0"><em>0%</em>Groundwork</div>
+    <div class="stop" style="left:15%"><em>15%</em>Runs</div>
+    <div class="stop" style="left:25%"><em>25%</em>Device</div>
+    <div class="stop" style="left:35%"><em>35%</em>Frame</div>
+    <div class="stop" style="left:50%"><em>50%</em>Menus</div>
+    <div class="stop" style="left:62%"><em>62%</em>World</div>
+    <div class="stop" style="left:78%"><em>78%</em>In-game</div>
+    <div class="stop" style="left:100%"><em>100%</em>Playable</div>
+  </div>
+</div>
+<div class="foot"><span>Live pull requests, activity and open issues for each project</span><b>clhelper.github.io/port-dashboards</b></div>
+</body>
+</html>

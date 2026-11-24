@@ -16,6 +16,7 @@ names that do are written with an HTML character reference / JSON escape for the
 never hold the name either. The last step of every build scans docs/ and fails on a hit.
 """
 import argparse
+import hashlib
 import html
 import json
 import os
@@ -207,12 +208,35 @@ def topbar(data, current, prefix):
             f'</div></header>')
 
 
+def image_version(path):
+    """A short hash of the image, for ?v=: chat apps keep a preview per URL, so a new picture needs a new URL."""
+    with open(path, "rb") as f:
+        return hashlib.sha1(f.read()).hexdigest()[:10]
+
+
+def share_tags(slug=None):
+    """Link-preview tags: the project's own picture (projects/<slug>/og-image.png) or the generic card for every
+    other page (src/og-image.png, rendered from src/og-card.html)."""
+    own = os.path.join(ROOT, "projects", slug, "og-image.png") if slug else None
+    if own and os.path.isfile(own):
+        img = f"{SITE_URL}{slug}/og-image.png?v={image_version(own)}"
+        alt = "The project's progress ring and its latest numbers"
+    else:
+        img = f"{SITE_URL}assets/og-image.png?v={image_version(os.path.join(SRC, 'og-image.png'))}"
+        alt = "Road to Playable: every open project on one ladder from groundwork to playable"
+    return (f'<meta property="og:image" content="{esc(img)}">\n<meta property="og:image:width" content="1200">\n'
+            f'<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="{esc(alt)}">\n'
+            f'<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="{esc(img)}">')
+
+
 def head(title, description, url, prefix):
     return (f'<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{esc(title)}</title>'
             f'<meta name="description" content="{esc(description)}">'
             f'<meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">'
             f'<meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{esc(url)}">'
+            f'<meta property="og:site_name" content="Road to Playable">{share_tags()}'
+            f'<meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}">'
             f'<meta name="theme-color" content="#0a0718">'
             f'<link rel="icon" href="{prefix}assets/favicon-64.png" sizes="64x64" type="image/png">'
             f'<link rel="stylesheet" href="{prefix}assets/site.css">'
@@ -350,12 +374,7 @@ def build_project(data, p, ranked):
         "checked": data["checked"],
         "base": {"repo": base["repo"], "name": base["name"], "slug": base["slug"]} if base else None,
     }
-    og = ""
-    if os.path.isfile(os.path.join(ROOT, "projects", p["slug"], "og-image.png")):
-        img = f'{SITE_URL}{p["slug"]}/og-image.png?v={data["checked"]}'
-        og = (f'<meta property="og:image" content="{esc(img)}">\n<meta property="og:image:width" content="1200">\n'
-              f'<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">\n'
-              f'<meta name="twitter:image" content="{esc(img)}">')
+    og = share_tags(p["slug"])
     template = keep_variant(read_text(os.path.join(FULL, "page.html")), generic, features)
     values = {
         "NAME": esc(p["name"]), "URL": esc(f'{SITE_URL}{p["slug"]}/'), "OG_IMAGE": og,
@@ -401,7 +420,7 @@ def build(out):
     write(os.path.join(out, ".nojekyll"), "")
     write(os.path.join(out, "index.html"), build_standings(data))
     os.makedirs(os.path.join(out, "assets"))
-    for name in SHARED_ASSETS + ("favicon-64.png", "favicon-32.png", "favicon-180.png"):
+    for name in SHARED_ASSETS + ("favicon-64.png", "favicon-32.png", "favicon-180.png", "og-image.png"):
         shutil.copyfile(os.path.join(SRC, name), os.path.join(out, "assets", name))
     public = {"checked": data["checked"], "ladder": data["ladder"], "kinds": data["kinds"],
               "standings": [{k: p.get(k) for k in ("slug", "name", "repo", "stage", "score", "rank", "avatar", "status")}

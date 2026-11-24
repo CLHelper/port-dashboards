@@ -137,6 +137,17 @@ class SiteTests(unittest.TestCase):
                 self.assertEqual('src="../assets/full/coord.js"' in page, "coord" in p.get("features", []))
                 self.assertEqual('class="gone"' in page, "gone" in p.get("features", []))
 
+    def test_every_page_has_a_share_image_that_exists(self):
+        pages = [("index.html",)] + [(p["slug"], "index.html") for p in self.data["projects"]]
+        for parts in pages:
+            with self.subTest(page="/".join(parts)):
+                page = self.read(*parts)
+                m = re.search(r'<meta property="og:image" content="([^"?]+)\?v=[0-9a-f]{10}"', page)
+                self.assertIsNotNone(m, "no versioned og:image")
+                self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+                local = m.group(1).replace(build.SITE_URL, "")
+                self.assertTrue(os.path.isfile(os.path.join(self.out, *local.split("/"))), local)
+
     def test_the_engine_scripts_are_served_once(self):
         for name in ("live.js", "pipeline.js", "project.js", "race.js", "hardware.json"):
             self.assertTrue(os.path.isfile(os.path.join(self.out, "assets", "full", name)), name)
