@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AnyXboxX · Road to Playable</title>
-<meta name="description" content="AnyXboxX, live: stage 6 of 8 (World loads) on the road to playable, its pull requests, activity and open issues.">
+<meta name="description" content="AnyXboxX, live: stage 7 of 8 (In-game) on the road to playable, its pull requests, activity and open issues.">
 <meta property="og:title" content="AnyXboxX · Road to Playable">
-<meta property="og:description" content="AnyXboxX, live: stage 6 of 8 (World loads) on the road to playable, its pull requests, activity and open issues.">
+<meta property="og:description" content="AnyXboxX, live: stage 7 of 8 (In-game) on the road to playable, its pull requests, activity and open issues.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Road to Playable">
 <meta property="og:url" content="https://clhelper.github.io/port-dashboards/anyxboxx/">
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://clhelper.github.io/port-dashboards/assets/og-image.png?v=4a3e48b005">
 <meta name="twitter:title" content="AnyXboxX · Road to Playable">
-<meta name="twitter:description" content="AnyXboxX, live: stage 6 of 8 (World loads) on the road to playable, its pull requests, activity and open issues.">
+<meta name="twitter:description" content="AnyXboxX, live: stage 7 of 8 (In-game) on the road to playable, its pull requests, activity and open issues.">
 <meta name="theme-color" content="#0a0718">
 <link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="../assets/favicon-64.png" sizes="64x64" type="image/png">
@@ -925,8 +925,8 @@ code.hash { word-break: break-all; font-size: 12.5px; }
         <details>
           <summary>How far is it right now?</summary>
           <div class="a">
-            <p data-only="generic">Stage 6 of 8 on the shared ladder: <b>World loads</b>. Through its integration of Victory plus community patches, the game passes its menus at 30 fps and reaches the opening cutscene of the first mission with no GPU hang over 5 minutes. The 3D scene is black and the world runs at 0.3 to 0.5 fps.</p>
-            <p data-only="generic">Source: README status box dated 2026-11-24, i7-13700KF + RTX 4070 SUPER. Read by hand on 2026-11-24; projects move fast, so check its commits for anything newer. <a href="../">How it compares with the others</a>.</p>
+            <p data-only="generic">Stage 7 of 8 on the shared ladder: <b>In-game</b>. Runs the game through fxceless&#x27;s fork of Victory: menus at 30 fps, then the world is shown and the character moves under the player&#x27;s control in the starting area, at about 4 fps for about 13 minutes, before the host device is lost.</p>
+            <p data-only="generic">Source: README status box updated 2026-11-24, observed by the maintainer, RTX 4070 SUPER. Read by hand on 2026-11-24; projects move fast, so check its commits for anything newer. <a href="../">How it compares with the others</a>.</p>
             
           </div>
         </details>
@@ -1009,7 +1009,7 @@ code.hash { word-break: break-all; font-size: 12.5px; }
 </footer>
 <div class="toast" id="toast"></div>
 
-<script type="application/json" id="project-config">{"slug":"anyxboxx","name":"AnyXboxX","repo":"LooperSalty/AnyXboxX","branch":"main","features":[],"ladder":[{"key":"groundwork","label":"Groundwork","pct":0,"means":"Tools, formats and loaders; the game's own executable has not been run yet."},{"key":"exe","label":"Executable runs","pct":15,"means":"The game's code starts: its entry point runs and its imports are answered."},{"key":"device","label":"Graphics device","pct":25,"means":"It creates its graphics device, queues and command lists, but nothing reaches the screen."},{"key":"frame","label":"First frame","pct":35,"means":"Frames reach the screen, even blank or garbled ones."},{"key":"menus","label":"Menus","pct":50,"means":"The game's own screens are drawn: first-boot screens, menus or the intro video."},{"key":"world","label":"World loads","pct":62,"means":"It loads into the game world, though the picture may still be dark or incomplete."},{"key":"ingame","label":"In-game","pct":78,"means":"Player control in the world, with a recognisable picture."},{"key":"playable","label":"Playable","pct":100,"means":"In-game for 30 minutes or more without a crash, at 20 frames a second or better."}],"stage":"world","stageN":6,"stageLabel":"World loads","within":0.55,"score":70.8,"summary":"Through its integration of Victory plus community patches, the game passes its menus at 30 fps and reaches the opening cutscene of the first mission with no GPU hang over 5 minutes. The 3D scene is black and the world runs at 0.3 to 0.5 fps.","evidence":"README status box dated 2026-11-24, i7-13700KF + RTX 4070 SUPER","caveat":"game path runs on a fork of Victory; the project's own emulator core has not run the game","tested_on":"Windows 11, RTX 4070 SUPER","backend":"D3D12","shader_path":"RDNA2 to DXIL","language":"Python, C++ (game path in Rust)","kindLabel":"Fork","status":"active","statusLabel":"Active","checked":"2026-11-24","base":{"repo":"marvisak/VIctory","name":"Victory","slug":"victory"}}</script>
+<script type="application/json" id="project-config">{"slug":"anyxboxx","name":"AnyXboxX","repo":"LooperSalty/AnyXboxX","branch":"main","features":[],"ladder":[{"key":"groundwork","label":"Groundwork","pct":0,"means":"Tools, formats and loaders; the game's own executable has not been run yet."},{"key":"exe","label":"Executable runs","pct":15,"means":"The game's code starts: its entry point runs and its imports are answered."},{"key":"device","label":"Graphics device","pct":25,"means":"It creates its graphics device, queues and command lists, but nothing reaches the screen."},{"key":"frame","label":"First frame","pct":35,"means":"Frames reach the screen, even blank or garbled ones."},{"key":"menus","label":"Menus","pct":50,"means":"The game's own screens are drawn: first-boot screens, menus or the intro video."},{"key":"world","label":"World loads","pct":62,"means":"It loads into the game world, though the picture may still be dark or incomplete."},{"key":"ingame","label":"In-game","pct":78,"means":"Player control in the world, with a recognisable picture."},{"key":"playable","label":"Playable","pct":100,"means":"In-game for 30 minutes or more without a crash, at 20 frames a second or better."}],"stage":"ingame","stageN":7,"stageLabel":"In-game","within":0.25,"score":83.5,"summary":"Runs the game through fxceless's fork of Victory: menus at 30 fps, then the world is shown and the character moves under the player's control in the starting area, at about 4 fps for about 13 minutes, before the host device is lost.","evidence":"README status box updated 2026-11-24, observed by the maintainer, RTX 4070 SUPER","caveat":"game path runs on fxceless's fork of Victory (pinned at d279e69; a newer pin with that fork's device-loss fix is open as a pull request); the project's own emulator core has not run the game","tested_on":"Windows 11, RTX 4070 SUPER","backend":"D3D12","shader_path":"RDNA2 to DXIL","language":"Python, C++ (game path in Rust)","kindLabel":"Fork","status":"active","statusLabel":"Active","checked":"2026-11-24","base":{"repo":"marvisak/VIctory","name":"Victory","slug":"victory"}}</script>
 <script>
 'use strict';
 
